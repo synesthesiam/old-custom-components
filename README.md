@@ -39,7 +39,8 @@ Overview
 rhasspy provides a set of custom components for Home Assistant, which depend on
 the tools found in
 [rhasspy-tools](https://github.com/synesthesiam/rhasspy-tools). There are
-[several quickstarts](https://github.com/synesthesiam/rhasspy-assistant/doc/)
+[several
+quickstarts](https://github.com/synesthesiam/rhasspy-assistant/tree/master/doc)
 that describe the installation process in detail for different scenarios. In
 general, the installation process involves:
 
@@ -119,42 +120,6 @@ Hardware Requirements
     * Raspberry Pi 3 is slow, but works
     * Any desktop computer or server that can run Linux (`armv7l` or `x86_64`)
 
-MaryTTS
----------
-
-I think the MaryTTS text to speech system sounds better than picoTTS for offline
-use. Below is my guide for installing MaryTTS and some additional voices. This
-is **not** recommended for the Raspberry Pi, due to its limited RAM.
-
-Start by downloading the MaryTTS sources:
-
-    mkdir -p download
-    wget -O download/marytts-5.2.zip https://github.com/marytts/marytts/releases/download/v5.2/marytts-5.2.zip
-    unzip download/marytts-5.2.zip
-    
-After unzipping, you can run the MaryTTS server (assuming you have `java` in your `PATH`):
-
-    marytts-5.2/bin/marytts-server
-    
-Additional voices can be found [on Github](https://github.com/marytts). 
-For example, the Prudence (British Female) voice can be installed as follows:
-
-    wget -O marytts-5.2/download/voice-dfki-prudence-hsmm-5.2.zip https://github.com/marytts/voice-dfki-prudence-hsmm/releases/download/v5.2/voice-dfki-prudence-hsmm-5.2.zip
-    unzip -d marytts-5.2 marytts-5.2/download/voice-dfki-prudence-hsmm-5.2.zip
-    
-Be careful to only install the voices you need. MaryTTS seems to load them all
-into RAM up front, so a Raspberry Pi will run out of room quickly. If you want
-to install all of the English voices, do the following:
-
-    for voice in dkfi-prudence dfki-poppy dfki-obadiah dfki-spike cmu-bdl cmu-rms; do
-      wget -O marytts-5.2/download/voice-$voice-hsmm-5.2.zip https://github.com/marytts/voice-$voice-hsmm/releases/download/v5.2/voice-$voice-hsmm-5.2.zip;
-      unzip -d marytts-5.2 marytts-5.2/download/voice-$voice-hsmm-5.2.zip;
-    done
-    
-Add the [marytts
-platform](https://www.home-assistant.io/components/tts.marytts/) to your
-`configuration.yaml` file in Home Assistant.
-
 Running rhasspy
 ------------------
 
@@ -196,3 +161,69 @@ Importantly, the example `automations.yaml` file defines rules for Home
 Assistant that pass information between rhasspy's components. These are critical
 for ensuring that rhasspy listens for the wake word on startup, listens for
 commands when woken up, and passes commands to the intent recognizer.
+
+Training
+----------
+
+Once you have rhasspy configured and running, you can extend it by adding new
+training phrases. By default, these are stored in Markdown format in
+`rhasspy-assistant/data/examples.md`. Examples are broken down by intent, so
+
+    ## intent:HassTurnOff
+    - turn off the [living room lamp](name)
+    - turn off [living room lamp](name)
+    - turn off the [garage light](name)
+    - turn off [garage light](name)
+    
+provides 4 examples for the `HassTurnOff` intent. The names on the intents and
+slots map directly to [Home Assistant's intent
+system](https://developers.home-assistant.io/docs/en/intent_index.html). You can
+easily define your own intents by adding an
+[intent_script](https://www.home-assistant.io/components/intent_script/)
+configuration and making sure the name matches (e.g., `GetTemperature` under
+`intent_script` matches `## intent:GetTemperature` in `examples.md`).
+
+Whenever you modify your examples, you need to re-train rhasspy by calling the
+`rhasspy_train.train` service (either from the Home Assistant frontend or via a
+REST call). Watch the logs carefully for errors, and check
+`rhasspy-assistant/data` to make sure new `mixed.dict` and `mixed.lm` files are
+created. A `guess.dict` file will be generated with pronunciations of unknown
+words. Add these to the main dictionary file if you're happy with them (see
+[this tutorial](https://cmusphinx.github.io/wiki/tutorialdict/) for more
+information).
+
+MaryTTS
+---------
+
+I think the MaryTTS text to speech system sounds better than picoTTS for offline
+use. Below is my guide for installing MaryTTS and some additional voices. This
+is **not** recommended for the Raspberry Pi, due to its limited RAM.
+
+Start by downloading the MaryTTS sources:
+
+    mkdir -p download
+    wget -O download/marytts-5.2.zip https://github.com/marytts/marytts/releases/download/v5.2/marytts-5.2.zip
+    unzip download/marytts-5.2.zip
+    
+After unzipping, you can run the MaryTTS server (assuming you have `java` in your `PATH`):
+
+    marytts-5.2/bin/marytts-server
+    
+Additional voices can be found [on Github](https://github.com/marytts). 
+For example, the Prudence (British Female) voice can be installed as follows:
+
+    wget -O marytts-5.2/download/voice-dfki-prudence-hsmm-5.2.zip https://github.com/marytts/voice-dfki-prudence-hsmm/releases/download/v5.2/voice-dfki-prudence-hsmm-5.2.zip
+    unzip -d marytts-5.2 marytts-5.2/download/voice-dfki-prudence-hsmm-5.2.zip
+    
+Be careful to only install the voices you need. MaryTTS seems to load them all
+into RAM up front, so a Raspberry Pi will run out of room quickly. If you want
+to install all of the English voices, do the following:
+
+    for voice in dkfi-prudence dfki-poppy dfki-obadiah dfki-spike cmu-bdl cmu-rms; do
+      wget -O marytts-5.2/download/voice-$voice-hsmm-5.2.zip https://github.com/marytts/voice-$voice-hsmm/releases/download/v5.2/voice-$voice-hsmm-5.2.zip;
+      unzip -d marytts-5.2 marytts-5.2/download/voice-$voice-hsmm-5.2.zip;
+    done
+    
+Add the [marytts
+platform](https://www.home-assistant.io/components/tts.marytts/) to your
+`configuration.yaml` file in Home Assistant.
