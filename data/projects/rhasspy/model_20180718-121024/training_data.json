@@ -1,0 +1,148 @@
+{
+  "rasa_nlu_data": {
+    "entity_synonyms": [],
+    "regex_features": [],
+    "common_examples": [
+      {
+        "text": "turn off the living room lamp",
+        "intent": "HassTurnOff",
+        "entities": [
+          {
+            "value": "living room lamp",
+            "end": 29,
+            "entity": "name",
+            "start": 13
+          }
+        ]
+      },
+      {
+        "text": "turn off living room lamp",
+        "intent": "HassTurnOff",
+        "entities": [
+          {
+            "value": "living room lamp",
+            "end": 25,
+            "entity": "name",
+            "start": 9
+          }
+        ]
+      },
+      {
+        "text": "turn off the garage light",
+        "intent": "HassTurnOff",
+        "entities": [
+          {
+            "value": "garage light",
+            "end": 25,
+            "entity": "name",
+            "start": 13
+          }
+        ]
+      },
+      {
+        "text": "turn off garage light",
+        "intent": "HassTurnOff",
+        "entities": [
+          {
+            "value": "garage light",
+            "end": 21,
+            "entity": "name",
+            "start": 9
+          }
+        ]
+      },
+      {
+        "text": "turn on the living room lamp",
+        "intent": "HassTurnOn",
+        "entities": [
+          {
+            "value": "living room lamp",
+            "end": 28,
+            "entity": "name",
+            "start": 12
+          }
+        ]
+      },
+      {
+        "text": "turn on living room lamp",
+        "intent": "HassTurnOn",
+        "entities": [
+          {
+            "value": "living room lamp",
+            "end": 24,
+            "entity": "name",
+            "start": 8
+          }
+        ]
+      },
+      {
+        "text": "turn on the garage light",
+        "intent": "HassTurnOn",
+        "entities": [
+          {
+            "value": "garage light",
+            "end": 24,
+            "entity": "name",
+            "start": 12
+          }
+        ]
+      },
+      {
+        "text": "turn on garage light",
+        "intent": "HassTurnOn",
+        "entities": [
+          {
+            "value": "garage light",
+            "end": 20,
+            "entity": "name",
+            "start": 8
+          }
+        ]
+      },
+      {
+        "text": "what time is it",
+        "intent": "GetTime"
+      },
+      {
+        "text": "tell me the current time",
+        "intent": "GetTime"
+      },
+      {
+        "text": "what time is it right now",
+        "intent": "GetTime"
+      },
+      {
+        "text": "what's the time",
+        "intent": "GetTime"
+      },
+      {
+        "text": "what's the temperature",
+        "intent": "GetTemperature"
+      },
+      {
+        "text": "how hot is it",
+        "intent": "GetTemperature"
+      },
+      {
+        "text": "how cold is it",
+        "intent": "GetTemperature"
+      },
+      {
+        "text": "what is the current temperature",
+        "intent": "GetTemperature"
+      },
+      {
+        "text": "is the garage door open",
+        "intent": "GarageOpenClosed"
+      },
+      {
+        "text": "is the garage door closed",
+        "intent": "GarageOpenClosed"
+      },
+      {
+        "text": "is the garage door open or closed",
+        "intent": "GarageOpenClosed"
+      }
+    ]
+  }
+}

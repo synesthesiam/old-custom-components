@@ -1,0 +1,111 @@
+
+\data\
+ngram 1=29
+ngram 2=51
+ngram 3=18
+
+\1-grams:
+-0.7626391	</s>
+-99	<s>	-0.6530081
+-1.740363	closed	-0.0008574426
+-2.041393	cold	-0.2682375
+-1.740363	current	-0.4527619
+-1.564271	door	-0.2432132
+-1.196295	garage	-0.8745345
+-2.041393	hot	-0.2682375
+-1.740363	how	-0.4691523
+-1.138303	is	-0.8905735
+-1.439333	it	-0.6118198
+-1.439333	lamp	-0.6166188
+-1.439333	light	-0.6166188
+-1.439333	living	-0.6828832
+-2.041393	me	-0.2552725
+-2.041393	now	-0.2186787
+-1.439333	off	-0.2873287
+-1.439333	on	-0.2873287
+-1.740363	open	-0.3899711
+-2.041393	or	-0.293061
+-2.041393	right	-0.2970638
+-1.439333	room	-0.6828832
+-2.041393	tell	-0.2970638
+-1.740363	temperature	-0.0008574426
+-1	the	-0.4401901
+-1.439333	time	0.03910585
+-1.138303	turn	-0.9214501
+-1.564271	what	-0.2091334
+-1.740363	whats	-0.03745124
+
+\2-grams:
+-1.736279	<s> how
+-0.8016323	<s> is	-0.3467875
+-1.278754	<s> tell
+-0.3756636	<s> turn	0
+-0.8016323	<s> what	-0.06142848
+-1.736279	<s> whats	-0.1033479
+-0.7585557	closed </s>
+-0.30103	cold is
+-0.4771213	current temperature
+-0.4771213	current time
+-0.4771213	door closed
+-0.934647	door open
+-0.4259687	garage door	-0.06142848
+-0.30103	garage light	0
+-0.30103	hot is
+-0.4771213	how cold
+-0.4771213	how hot
+-0.3521825	is it	-0.20412
+-0.3521825	is the	-0.3388186
+-0.2218488	it </s>
+-0.69897	it right
+-0.09691001	lamp </s>
+-0.09691001	light </s>
+-0.09691001	living room	0
+-0.30103	me the
+-0.30103	now </s>
+-0.60206	off garage
+-0.60206	off living
+-1.059586	off the
+-0.60206	on garage
+-0.60206	on living
+-1.059586	on the
+-0.4771213	open </s>
+-0.4771213	open or
+-0.30103	or closed
+-0.30103	right now
+-0.09691001	room lamp	0
+-0.30103	tell me
+-0.7585557	temperature </s>
+-1.498918	the current
+-0.3424227	the garage	0.3185933
+-1.498918	the living	0.5124133
+-1.041393	the temperature
+-1.041393	the time
+-1.059586	time </s>
+-1.059586	time is	0.06871583
+-0.3521825	turn off	-0.04372259
+-0.3521825	turn on	-0.04372259
+-0.4771213	what is
+-0.934647	what time	-0.1469421
+-0.7585557	whats the
+
+\3-grams:
+-0.6330091	garage door open
+-0.2218488	the garage door
+-0.8548579	the garage light
+-0.1249387	<s> is the
+-0.4569179	time is it
+-0.1249387	is it </s>
+-0.09691001	room lamp </s>
+-0.09691001	garage light </s>
+-0.4569179	the living room
+-0.7579479	turn off the
+-0.7579479	turn on the
+-0.09691001	living room lamp
+-0.1249387	is the garage
+-0.4569179	what time is
+-0.3521825	<s> turn off
+-0.3521825	<s> turn on
+-0.6330091	<s> what time
+-0.4569179	<s> whats the
+
+\end\
