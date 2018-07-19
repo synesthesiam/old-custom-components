@@ -57,7 +57,7 @@ rhasspy_train:
     - $RHASSPY_TOOLS/pocketsphinx/cmudict-en-us.dict
   dictionary_guess: $RHASSPY_ASSISTANT/data/guess.dict
   dictionary_mixed: $RHASSPY_ASSISTANT/data/mixed.dict
-  language_model_base: $RHASSPY_TOOLS/pocketsphinx/en-70k-0.2-pruned.lm
+  language_model_base: $RHASSPY_TOOLS/pocketsphinx/en-70k-0.2-pruned.lm.gz
   language_model_example: $RHASSPY_ASSISTANT/data/examples.lm
   language_model_mixed: $RHASSPY_ASSISTANT/data/mixed.lm
 
