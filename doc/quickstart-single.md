@@ -36,6 +36,8 @@ Install these packages first from your distribution's repositories:
     * `libasound2-dev`
     * `libpulse-dev`
     * `swig`
+* PyAudio
+    * `portaudio19-dev`
 * rasaNLU
     * `libatlas-dev`
     * `libatlas-base-dev`
@@ -47,6 +49,7 @@ You can install them all at once with a single command:
     sudo apt-get install build-essential \
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
+        portaudio19-dev \
         libatlas-dev libatlas-base-dev \
         libpicotts-utils
         
@@ -60,25 +63,25 @@ environment](https://www.home-assistant.io/docs/installation/virtualenv/).
 
 **NOTE**: Home Assistant requires at least Python 3.5.3
 
-1. Create a virtual environment with access to system site packages:
+Create a virtual environment with access to system site packages:
 
     python3 -m venv homeassistant
     
-2. Open the virtual environment and activate it:
+Open the virtual environment and activate it:
 
     cd homeassistant
     source bin/activate
     
-3. Install Home Assistant:
+Install Home Assistant:
 
     python3 -m pip install wheel homeassistant
     
-4. Run Home Assistant (wait for it to install dependencies):
+Run Home Assistant (wait for it to install dependencies):
 
     mkdir -p config
     hass -c config
     
-5. Open a web browser and visit [http://localhost:8123](http://localhost:8123)
+Open a web browser and visit [http://localhost:8123](http://localhost:8123)
 
 If all went well, you should see the Home Assistant frontend. Additionally, you
 should find a `config` directory inside your `homeassistant` directory with
@@ -96,34 +99,32 @@ compnents (`rhasspy-assistant`).
 Make a note of where you download these files, since you will need the enter the
 full path to them during configuration.
 
-1. Download rhasspy tools:
+Download rhasspy tools:
 
     git clone https://github.com/synesthesiam/rhasspy-tools.git
     
-2. Download rhasspy assistant:
+Download rhasspy assistant:
 
     git clone https://github.com/synesthesiam/rhasspy-assistant.git
     
-3. Copy the whole `custom_components` directory in `rhasspy-assistant/config` to
-   your Home Assistant configuration directory (where `configuration.yaml`
-   resides).
+Copy the whole `custom_components` directory in `rhasspy-assistant/config` to
+your Home Assistant configuration directory (where `configuration.yaml`
+resides).
 
-4. Incorporate the files in `rhasspy-assistant/config/examples/single_machine`
-   into your Home Assistant configuration. You **must** replace the following
-   placeholders in `configuration.yaml` and `automations.yaml`:
+Incorporate the files in `rhasspy-assistant/config/examples/single_machine`
+into your Home Assistant configuration. You **must** replace the following
+placeholders in `configuration.yaml` and `automations.yaml`:
    
-    * `$RHASSPY_ASSISTANT` - replace with the full path to the
-      `rhasspy-assistant` directory
-    * `$RHASSPY_TOOLS` - replace with the full path to the
-      `rhasspy-tools` directory
+* `$RHASSPY_ASSISTANT` - replace with the full path to the `rhasspy-assistant` directory
+* `$RHASSPY_TOOLS` - replace with the full path to the `rhasspy-tools` directory
      
-5. Run Home Assistant (wait for it to install dependencies):
+Run Home Assistant (wait for it to install dependencies):
  
     cd homeassistant
     source bin/activate
     hass -c config
      
-6. Install a language model for `spaCy`
+Install a language model for `spaCy`:
 
     cd homeassistant
     source bin/activate
