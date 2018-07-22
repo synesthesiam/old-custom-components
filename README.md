@@ -18,8 +18,11 @@ rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
       [snowboy](https://snowboy.kitt.ai/) hotword detector).
 * **Hosted in Home Assistant**
     * rhasspy is not a standalone piece of software, but exists as a set of
-      resuable *Home Assistant components*. This gives rhasspy access to hundreds
-      of [components](https://www.home-assistant.io/components/) out of the box,
+      resuable *Home Assistant components* that connect directly to Home
+      Assistant's [intent
+      system](https://developers.home-assistant.io/docs/en/intent_index.html).
+      This gives rhasspy access to hundreds of
+      [components](https://www.home-assistant.io/components/) out of the box,
       and lets users incorporate only the pieces of rhasspy they're interested
       in.
 * **Modern Tools and Techniques**
@@ -27,11 +30,13 @@ rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
       keyword matching on a small set of user-defined keywords. rhasspy instead
       takes a (possibly large) set of [annotated training
       phrases](https://nlu.rasa.com/dataformat.html), and uses them to both
-      generate a language model and train an intent recognizer. In order to
+      generate a [language model](https://cmusphinx.github.io/wiki/tutoriallm/)
+      and train an (intent recognizer)[https://nlu.rasa.com/]. In order to
       accomodate flexible speech input, the generated language model is "mixed"
       with [CMU's base English
       model](https://sourceforge.net/projects/cmusphinx/files/Acoustic%20and%20Language%20Models/US%20English/).
       
+![rhasspy architecture](etc/images/architecture.png)
 
 Overview
 ----------
