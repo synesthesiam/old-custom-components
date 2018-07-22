@@ -36,7 +36,10 @@ rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
       with [CMU's base English
       model](https://sourceforge.net/projects/cmusphinx/files/Acoustic%20and%20Language%20Models/US%20English/).
       
-<img src="etc/images/architecture.png" alt="rhasspy architecture" align="center" width="600px" />
+      
+<p align="center">
+  <img src="etc/images/architecture.png" alt="rhasspy architecture" width="600px" />
+</p>
 
 Overview
 ----------
