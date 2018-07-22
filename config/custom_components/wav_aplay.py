@@ -31,7 +31,7 @@ def setup(hass, config):
         return False
 
     def play_wav(call):
-        filename = call.data[ATTR_FILENAME]
+        filename = os.path.expanduser(call.data[ATTR_FILENAME])
         args = ['aplay', '-q']
 
         for name, value in call.data.items():
