@@ -59,7 +59,22 @@ general, the installation process involves:
    [rhasspy-tools](https://github.com/synesthesiam/rhasspy-tools)
 4. Copying custom components and configuration files from `rhasspy-assistant` to
    your Home Assistant configuration directory
-5. Restarting Home Assistant and waiting for all the dependencies to install
+5. Editing the `configuration.yaml` and `automations.yaml` to set the
+   appropriate paths to `rhasspy-tools` and `rhasspy-assistant`
+6. Restarting Home Assistant and waiting for all the dependencies to install
+    * `PyAudio` and `spaCy` seem to take the longest
+7. Downloading a `spaCy` language model and linking it
+    * For example: `python3 -m spacy download en`
+
+Once you have rhasspy installed and working, you can add new training phrases
+and intents by editing the examples markdown file(s) pointed to by your
+`rhasspy_train` component configuration. These files are in [rasaNLU's markdown
+training format](https://nlu.rasa.com/dataformat.html#markdown-format), and are
+used to (1) generate a
+[dictionary](https://cmusphinx.github.io/wiki/tutorialdict/) and [language
+model](https://cmusphinx.github.io/wiki/tutoriallm/) for pocketsphinx, and (2)
+train an [intent recognizer](https://nlu.rasa.com/) that will trigger [intents
+inside Home Assistant](https://www.home-assistant.io/components/intent_script).
 
 Home Assistant Components
 ------------------------------
@@ -77,7 +92,7 @@ a single machine, a Raspberry Pi, or a client and server.
     * Voice activity detection with [webrtcvad](https://webrtc.org)
     * Audio input from [PyAudio](https://people.csail.mit.edu/hubert/pyaudio) or WAV file
 * `rasa_nlu.py`
-    * Intent recognition from text using [rasaNLU](https://nlu.rasa.ai/) and [spacy](https://spacy.io)
+    * Intent recognition from text using [rasaNLU](https://nlu.rasa.ai/) and [spaCy](https://spacy.io)
     * Offline training available from Markdown data files
     * Utilizes Home Assistant's own [intent system](https://www.home-assistant.io/components/intent_script)
 * `hotword_pocketsphinx.py`
