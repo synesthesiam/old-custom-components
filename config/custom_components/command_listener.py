@@ -7,6 +7,8 @@ import math
 import asyncio
 import wave
 import threading
+import requests
+import io
 
 import voluptuous as vol
 
@@ -72,9 +74,11 @@ CONFIG_SCHEMA = vol.Schema({
 SERVICE_LISTEN = 'listen'
 
 ATTR_FILENAME = 'filename'
+ATTR_URL = 'url'
 
 SCHEMA_SERVICE_LISTEN = vol.Schema({
-    vol.Required(ATTR_FILENAME): cv.string
+    vol.Optional(ATTR_FILENAME): cv.string,
+    vol.Optional(ATTR_URL): cv.string
 })
 
 OBJECT_MICROPHONE = '%s.microphone' % DOMAIN
@@ -109,7 +113,7 @@ class CommandListener(object):
         self._audio = None
 
     @asyncio.coroutine
-    def async_listen(self, filename):
+    def async_listen(self, filename=None, url=None):
         import pyaudio
 
         if self._vad is None:
@@ -201,11 +205,12 @@ class CommandListener(object):
                             stream_callback=stream_callback,
                             frames_per_buffer=self._chunk_size)
 
+        loop = asyncio.get_event_loop()
         # Start listening
         self._logger.debug('Listening')
         mic.start_stream()
 
-        yield from asyncio.get_event_loop().run_in_executor(None, finished_event.wait)
+        yield from loop.run_in_executor(None, finished_event.wait)
 
         # Stop listening and clean up
         mic.stop_stream()
@@ -215,12 +220,28 @@ class CommandListener(object):
         self._logger.debug('Stopped listening')
         self._logger.info('Recorded %s byte(s) of audio' % len(recorded_data))
 
-        # Write WAV data
-        with wave.open(filename, mode='wb') as wav_file:
-            wav_file.setframerate(self._sample_rate)
-            wav_file.setsampwidth(self._sample_width)
-            wav_file.setnchannels(self._channels)
-            wav_file.writeframesraw(recorded_data)
+        if filename is not None:
+            # Write WAV data to file system
+            with wave.open(filename, mode='wb') as wav_file:
+                wav_file.setframerate(self._sample_rate)
+                wav_file.setsampwidth(self._sample_width)
+                wav_file.setnchannels(self._channels)
+                wav_file.writeframesraw(recorded_data)
+        elif url is not None:
+            # POST WAV data to URL
+            with io.BytesIO() as wav_data:
+                with wave.open(wav_data, mode='wb') as wav_file:
+                    wav_file.setframerate(self._sample_rate)
+                    wav_file.setsampwidth(self._sample_width)
+                    wav_file.setnchannels(self._channels)
+                    wav_file.writeframesraw(recorded_data)
+
+                wav_data.seek(0)
+                requests.post(url, data=wav_data,
+                              headers={ 'Content-Type': 'audio/wav' },
+                              timeout=10)
+
+                self._logger.debug('POSTed %s byte(s) to' % url)
 
 # -----------------------------------------------------------------------------
 
@@ -245,14 +266,14 @@ def async_setup(hass, config):
     @asyncio.coroutine
     def async_listen(call):
         hass.states.async_set(OBJECT_MICROPHONE, STATE_RECORDING)
-        filename = call.data[ATTR_FILENAME]
-        yield from hass.data[DOMAIN].async_listen(filename)
+        filename = call.data.get(ATTR_FILENAME)
+        url = call.data.get(ATTR_URL)
+        yield from hass.data[DOMAIN].async_listen(filename=filename, url=url)
         hass.states.async_set(OBJECT_MICROPHONE, STATE_IDLE)
 
         # Fire recorded event
         hass.bus.async_fire(EVENT_COMMAND_RECORDED, {
-            'name': name,         # name of the component
-            'filename': filename  # path to WAV file
+            'name': name         # name of the component
         })
 
     hass.services.async_register(DOMAIN, SERVICE_LISTEN, async_listen,

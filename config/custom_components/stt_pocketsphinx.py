@@ -8,17 +8,23 @@ import asyncio
 import threading
 import wave
 import shutil
+import tempfile
+import subprocess
+import io
 
 import voluptuous as vol
 
 from homeassistant.const import CONF_NAME, EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers import intent, config_validation as cv
+from homeassistant.components.http import HomeAssistantView
 
 _LOGGER = logging.getLogger(__name__)
 
 REQUIREMENTS = ['pocketsphinx==0.1.15', 'webrtcvad==2.0.10', 'PyAudio>=0.2.8']
+DEPENDENCIES = ['http']
 
 DOMAIN = 'stt_pocketsphinx'
+STT_API_ENDPOINT = '/api/%s' % DOMAIN
 
 # ------
 # Config
@@ -78,9 +84,11 @@ SERVICE_LISTEN = 'listen'
 SERVICE_DECODE = 'decode_wav'
 
 ATTR_FILENAME = 'filename'
+ATTR_DATA = 'data'
 
 SCHEMA_SERVICE_DECODE = vol.Schema({
-    vol.Required(ATTR_FILENAME): cv.string
+    vol.Optional(ATTR_FILENAME): cv.string,
+    vol.Optional(ATTR_DATA): list
 })
 
 OBJECT_POCKETSPHINX = '%s.pocketsphinx' % DOMAIN
@@ -285,40 +293,61 @@ def async_setup(hass, config):
         decoded_phrase = None
         terminated = False
 
-        filename = call.data[ATTR_FILENAME]
+        if ATTR_FILENAME in call.data:
+            # Use WAV file
+            filename = call.data[ATTR_FILENAME]
+            with wave.open(filename, mode='rb') as wav_file:
+                data = wav_file.readframes(wav_file.getnframes())
+        else:
+            # Use data directly from JSON
+            filename = None
+            data = bytearray(call.data[ATTR_DATA])
+
         hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
         def decode():
-            nonlocal decoded_phrase
+            nonlocal decoded_phrase, data, filename
 
             # Check if WAV is in the correct format.
             # Convert with sox if not.
-            with wave.open(filename, mode='rb') as wav_file:
-                data = wav_file.readframes(wav_file.getnframes())
-                rate, width, channels = wav_file.getframerate(), wav_file.getsampwidth(), wav_file.getnchannels()
-                _LOGGER.debug('rate=%s, width=%s, channels=%s.' % (rate, width, channels))
+            with io.BytesIO(data) as wav_data:
+                with wave.open(wav_data, mode='rb') as wav_file:
+                    rate, width, channels = wav_file.getframerate(), wav_file.getsampwidth(), wav_file.getnchannels()
+                    _LOGGER.debug('rate=%s, width=%s, channels=%s.' % (rate, width, channels))
 
-                if (rate != 16000) or (width != 2) or (channels != 1):
-                    # Convert to 16-bit 16Khz mono (required by pocketsphinx acoustic models)
-                    _LOGGER.debug('Need to convert to 16-bit 16Khz mono.')
-                    if shutil.which('sox') is None:
-                        _LOGGER.error("'sox' command not found. Cannot convert WAV file to appropriate format. Expect poor performance.")
-                    else:
-                        # sox <IN> -r 16000 -e signed-integer -b 16 -c 1 <OUT>
-                        with tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+') as out_wav_file:
-                            subprocess.check_call(['sox',
-                                                   filename,
-                                                   '-r', '16000',
-                                                   '-e', 'signed-integer',
-                                                   '-b', '16',
-                                                   '-c', '1',
-                                                   out_wav_file.name])
+                    if (rate != 16000) or (width != 2) or (channels != 1):
+                        # Convert to 16-bit 16Khz mono (required by pocketsphinx acoustic models)
+                        _LOGGER.debug('Need to convert to 16-bit 16Khz mono.')
+                        if shutil.which('sox') is None:
+                            _LOGGER.error("'sox' command not found. Cannot convert WAV file to appropriate format. Expect poor performance.")
+                        else:
+                            temp_input_file = None
+                            if filename is None:
+                                # Need to write original WAV data out to a file for sox
+                                temp_input_file = tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+')
+                                temp_input_file.write(data)
+                                temp_input_file.seek(0)
+                                filename = temp_input_file.name
 
-                            out_wav_file.seek(0)
+                            # sox <IN> -r 16000 -e signed-integer -b 16 -c 1 <OUT>
+                            with tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+') as out_wav_file:
+                                subprocess.check_call(['sox',
+                                                       filename,
+                                                       '-r', '16000',
+                                                       '-e', 'signed-integer',
+                                                       '-b', '16',
+                                                       '-c', '1',
+                                                       out_wav_file.name])
 
-                            # Use converted data
-                            with wave.open(out_wav_file, 'rb') as wav_file:
-                                data = wav_file.readframes(wav_file.getnframes())
+                                out_wav_file.seek(0)
+
+                                # Use converted data
+                                with wave.open(out_wav_file, 'rb') as wav_file:
+                                    data = wav_file.readframes(wav_file.getnframes())
+
+                            if temp_input_file is not None:
+                                # Clean up temporary file
+                                del temp_input_file
 
             # Process WAV data as a complete utterance (best performance)
             with decoder.start_utterance():
@@ -328,6 +357,8 @@ def async_setup(hass, config):
                         decoded_phrase = decoder.hyp().hypstr
 
             decoded_event.set()
+
+        loop = asyncio.get_event_loop()
 
         # Decode in separate thread
         decoded_event.clear()
@@ -348,13 +379,18 @@ def async_setup(hass, config):
 
     # -------------------------------------------------------------------------
 
+    hass.http.register_view(ExternalSpeechView)
+
+    # Service to record commands
     hass.services.async_register(DOMAIN, SERVICE_LISTEN, async_listen)
+
+    # Service to do speech to text
     hass.services.async_register(DOMAIN, SERVICE_DECODE, async_decode,
                                  schema=SCHEMA_SERVICE_DECODE)
 
     hass.states.async_set(OBJECT_POCKETSPHINX, STATE_IDLE, state_attrs)
 
-    # Make sure snowboy terminates property when home assistant stops
+    # Make sure everything terminates property when home assistant stops
     @asyncio.coroutine
     def async_terminate(event):
         nonlocal terminated
@@ -367,3 +403,24 @@ def async_setup(hass, config):
     _LOGGER.info('Started')
 
     return True
+
+# -----------------------------------------------------------------------------
+
+
+class ExternalSpeechView(HomeAssistantView):
+    """Handle speech to text requests."""
+
+    url = STT_API_ENDPOINT
+    name = 'api:%s' % DOMAIN
+
+    async def post(self, request):
+        """Handle speech to text."""
+        hass = request.app['hass']
+        data = await request.read()
+
+        _LOGGER.debug("Received speech to text request: %s byte(s)", len(data))
+
+        await hass.services.async_call(DOMAIN, SERVICE_DECODE,
+                                       { ATTR_DATA: list(data) })
+
+        return 'OK'
