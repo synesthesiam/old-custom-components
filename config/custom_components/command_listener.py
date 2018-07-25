@@ -37,6 +37,9 @@ CONF_MIN_SEC = 'min_sec'
 CONF_SILENCE_SEC = 'silence_sec'
 CONF_TIMEOUT_SEC = 'timeout_sec'
 
+# URL to POST recorded WAV data to
+CONF_URL = 'url'
+
 DEFAULT_NAME = 'command_listener'
 DEFAULT_DEVICE_INDEX = -1    # default microphone
 DEFAULT_SAMPLE_RATE = 16000  # 16Khz
@@ -49,6 +52,8 @@ DEFAULT_VAD_MODE = 0         # 0-3 (agressiveness)
 DEFAULT_MIN_SEC = 2.0        # min seconds that command must last
 DEFAULT_SILENCE_SEC = 0.5    # min seconds of silence after command
 DEFAULT_TIMEOUT_SEC = 30.0   # max seconds that command can last
+
+DEFAULT_URL = None           # Use URL from service request
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
@@ -63,7 +68,9 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Optional(CONF_VAD_MODE, DEFAULT_VAD_MODE): int,
         vol.Optional(CONF_MIN_SEC, DEFAULT_MIN_SEC): float,
         vol.Optional(CONF_SILENCE_SEC, DEFAULT_SILENCE_SEC): float,
-        vol.Optional(CONF_TIMEOUT_SEC, DEFAULT_TIMEOUT_SEC): float
+        vol.Optional(CONF_TIMEOUT_SEC, DEFAULT_TIMEOUT_SEC): float,
+
+        vol.Optional(CONF_URL, DEFAULT_URL): cv.string
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -85,7 +92,7 @@ OBJECT_MICROPHONE = '%s.microphone' % DOMAIN
 STATE_IDLE = 'idle'
 STATE_RECORDING = 'recording'
 
-EVENT_COMMAND_RECORDED = 'command_recorded'
+EVENT_SPEECH_RECORDED = 'speech_recorded'
 
 class CommandListener(object):
     import pyaudio
@@ -262,24 +269,33 @@ def async_setup(hass, config):
         config[DOMAIN].get(CONF_SILENCE_SEC, DEFAULT_SILENCE_SEC),
         config[DOMAIN].get(CONF_TIMEOUT_SEC, DEFAULT_TIMEOUT_SEC))
 
+    url = config[DOMAIN].get(CONF_URL, DEFAULT_URL)
+
+    state_attrs = {
+        'friendly_name': 'Command Listener',
+        'icon': 'mdi:microphone-plus',
+        'text': ''
+    }
 
     @asyncio.coroutine
     def async_listen(call):
-        hass.states.async_set(OBJECT_MICROPHONE, STATE_RECORDING)
+        nonlocal url
+
+        hass.states.async_set(OBJECT_MICROPHONE, STATE_RECORDING, state_attrs)
         filename = call.data.get(ATTR_FILENAME)
-        url = call.data.get(ATTR_URL)
+        url = call.data.get(ATTR_URL, url)
         yield from hass.data[DOMAIN].async_listen(filename=filename, url=url)
-        hass.states.async_set(OBJECT_MICROPHONE, STATE_IDLE)
+        hass.states.async_set(OBJECT_MICROPHONE, STATE_IDLE, state_attrs)
 
         # Fire recorded event
-        hass.bus.async_fire(EVENT_COMMAND_RECORDED, {
+        hass.bus.async_fire(EVENT_SPEECH_RECORDED, {
             'name': name         # name of the component
         })
 
     hass.services.async_register(DOMAIN, SERVICE_LISTEN, async_listen,
                                  schema=SCHEMA_SERVICE_LISTEN)
 
-    hass.states.async_set(OBJECT_MICROPHONE, STATE_IDLE)
+    hass.states.async_set(OBJECT_MICROPHONE, STATE_IDLE, state_attrs)
 
     _LOGGER.info('Started')
 
