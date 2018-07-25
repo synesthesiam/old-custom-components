@@ -1,0 +1,10 @@
+default_view:
+  view: yes
+  entities:
+    - group.rhasspy
+
+rhasspy:
+  name: "rhasspy"
+  entities:
+    - hotword_precise.decoder
+    - command_listener.microphone

@@ -1,0 +1,52 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 0
+  longitude: 0
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 0
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+  # Customization file
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+# introduction:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+http:
+  # Secrets are defined in the file secrets.yaml
+  # api_password: !secret http_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  # base_url: example.duckdns.org:8123
+
+# =============
+# BEGIN RHASSPY
+# =============
+
+# Play WAV files using aplay.
+wav_aplay:
+
+# Listen for a hotword with Mycroft precise.
+hotword_precise:
+  model: $RHASSPY_ASSISTANT/wake/mycroft-precise/okay-rhasspy.pb
+
+# Record commands locally and POST to a server
+command_listener:
+  url: "http://$SERVER_URL:8123/api/stt_pocketsphinx"
+
+# =============
+# END RHASSPY
+# =============
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml

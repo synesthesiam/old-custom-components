@@ -1,0 +1,30 @@
+# Pass text from pocketsphinx to the intent recognizer.
+- alias: "speech to text -> intent recognition"
+  trigger:
+    platform: event
+    event_type: speech_to_text
+  action:
+    - service: rasa_nlu.parse
+      data_template:
+        message: "{{ trigger.event.data['text'] }}"
+        project: rhasspy
+
+# Play a sound if the intent was recognized
+- alias: "known intent"
+  trigger:
+    platform: event
+    event_type: known_intent
+  action:
+    - service: wav_aplay.play_wav
+      data:
+        filename: $RHASSPY_ASSISTANT/etc/wav/intent_recognized.wav
+
+# Play an error sound if the intent wasn't recognized.
+- alias: "unknown intent"
+  trigger:
+    platform: event
+    event_type: unknown_intent
+  action:
+    - service: wav_aplay.play_wav
+      data:
+        filename: $RHASSPY_ASSISTANT/etc/wav/intent_not_recognized.wav
