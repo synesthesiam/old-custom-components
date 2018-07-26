@@ -186,7 +186,12 @@ for ensuring that rhasspy listens for the wake word on startup, listens for
 commands when woken up, and passes commands to the intent recognizer.
 
 An interaction between a user and rhasspy is pictured below. Each step of the
-process is shown, from waking up to response.
+process is shown, from waking up to response. Because the output of rhasspy's
+speech/intent recognition is a Home Assistant intent (possibly with slots
+filled), you can script *any* set of actions to follow using the built-in
+[intent_script](https://www.home-assistant.io/components/intent_script/)
+component. The slot values from the recognized intent will be available as
+variables in your template.
 
 <p align="center">
   <img src="etc/images/time_flow.png" alt="example workflow" width="700px" />
@@ -213,6 +218,10 @@ easily define your own intents by adding an
 configuration and making sure the name matches (e.g., `GetTemperature` under
 `intent_script` matches `## intent:GetTemperature` in `examples.md`).
 
+<p align="center">
+  <img src="etc/images/training_data.png" alt="training data format" width="600px" />
+</p>
+
 Whenever you modify your examples, you need to re-train rhasspy by calling the
 `rhasspy_train.train` service (either from the Home Assistant frontend or via a
 REST call). Watch the logs carefully for errors, and check
@@ -223,7 +232,7 @@ words. Add these to the main dictionary file if you're happy with them (see
 information).
 
 <p align="center">
-  <img src="etc/images/training_data.png" alt="training data format" width="600px" />
+  <img src="etc/images/language_model.png" alt="language models and dictionaries" width="700px" />
 </p>
 
 MaryTTS
