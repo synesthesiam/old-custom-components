@@ -113,7 +113,7 @@ For special cases, these components are also available:
 * `command_listener.py`
     * Voice activity detection with [webrtcvad](https://webrtc.org)
     * Audio input from [PyAudio](https://people.csail.mit.edu/hubert/pyaudio)
-    * Audio output to WAV file
+    * Audio output to WAV file or HTTP POST to another Home Assistant instance
     * Used when speech to text is done on a different machine from where audio is recorded
 * `picotts_aplay.py`
     * Text to speech with [picoTTS](https://en.wikipedial.org/wiki/SVOX)
@@ -185,6 +185,13 @@ Assistant that pass information between rhasspy's components. These are critical
 for ensuring that rhasspy listens for the wake word on startup, listens for
 commands when woken up, and passes commands to the intent recognizer.
 
+An interaction between a user and rhasspy is pictured below. Each step of the
+process is shown, from waking up to response.
+
+<p align="center">
+  <img src="etc/images/time_flow.png" alt="example workflow" width="700px" />
+</p>
+
 Training
 ----------
 
@@ -214,6 +221,10 @@ created. A `guess.dict` file will be generated with pronunciations of unknown
 words. Add these to the main dictionary file if you're happy with them (see
 [this tutorial](https://cmusphinx.github.io/wiki/tutorialdict/) for more
 information).
+
+<p align="center">
+  <img src="etc/images/training_data.png" alt="training data format" width="600px" />
+</p>
 
 MaryTTS
 ---------
