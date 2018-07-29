@@ -18,7 +18,10 @@ from homeassistant.helpers import config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['rasa-nlu==0.12.3', 'spacy==2.0.11']
+# rasaNLU is only required if you use it instead of the conversation component.
+# If you use the rasa_nlu component, then you should already have these
+# requirements installed.
+#REQUIREMENTS = ['rasa-nlu==0.12.3', 'spacy==2.0.11']
 
 # Executables that are expected to be in the PATH
 REQUIRED_TOOLS = ['ngram-count', 'phonetisaurus-g2p', 'ngram']
@@ -91,10 +94,10 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Optional(CONF_NGRAM_COUNT, DEFAULT_NGRAM_COUNT): cv.string,
         vol.Optional(CONF_PHONETISAURUS, DEFAULT_PHONETISAURUS): cv.string,
 
-        vol.Required(CONF_PROJECT_DIR): cv.string,
+        vol.Optional(CONF_PROJECT_DIR, None): cv.string,
         vol.Optional(CONF_PROJECT_NAME, DEFAULT_PROJECT_NAME): cv.string,
         vol.Required(CONF_EXAMPLE_FILES): list,
-        vol.Required(CONF_RASA_CONFIG): cv.string,
+        vol.Optional(CONF_RASA_CONFIG, None): cv.string,
         vol.Optional(CONF_RASA_THREADS, DEFAULT_RASA_THREADS): int,
 
         vol.Required(CONF_DICT_FILES): list,
@@ -124,10 +127,17 @@ def async_setup(hass, config):
     phonetisaurus = os.path.expanduser(config[DOMAIN].get(CONF_PHONETISAURUS, DEFAULT_PHONETISAURUS))
     g2p_fst = os.path.expanduser(config[DOMAIN][CONF_G2P_FST])
 
-    project_dir = os.path.expanduser(config[DOMAIN][CONF_PROJECT_DIR])
+    project_dir = config[DOMAIN].get(CONF_PROJECT_DIR, None)
+    if project_dir is not None:
+        project_dir = os.path.expanduser(project_dir)
+
     project_name = config[DOMAIN].get(CONF_PROJECT_NAME, DEFAULT_PROJECT_NAME)
     example_files = [os.path.expanduser(path) for path in config[DOMAIN][CONF_EXAMPLE_FILES]]
-    rasa_config = os.path.expanduser(config[DOMAIN][CONF_RASA_CONFIG])
+
+    rasa_config = config[DOMAIN].get(CONF_RASA_CONFIG, None)
+    if rasa_config is not None:
+        rasa_config = os.path.expanduser(rasa_config)
+
     rasa_threads = config[DOMAIN].get(CONF_RASA_THREADS, DEFAULT_RASA_THREADS)
 
     dict_files = [os.path.expanduser(path) for path in config[DOMAIN][CONF_DICT_FILES]]
@@ -147,10 +157,11 @@ def async_setup(hass, config):
             _LOGGER.info('Starting training')
 
             try:
-                # Train project for rasaNLU
-                train_intent_recognizer(example_files, rasa_config,
-                                        project_dir, project_name,
-                                        num_threads=rasa_threads)
+                # Optionally train project for rasaNLU
+                if (project_dir is not None) and (rasa_config is not None):
+                    train_intent_recognizer(example_files, rasa_config,
+                                            project_dir, project_name,
+                                            num_threads=rasa_threads)
 
                 # Train language model for pocketsphinx
                 train_speech_recognizer(example_files,
