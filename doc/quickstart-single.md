@@ -42,7 +42,7 @@ Install these packages first from your distribution's repositories:
     * `libatlas-dev`
     * `libatlas-base-dev`
 * rhasspy
-    * `libpicotts-utils`
+    * `libttspico-utils`
     
 You can install them all at once with a single command:
 
@@ -51,7 +51,7 @@ You can install them all at once with a single command:
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
         libatlas-dev libatlas-base-dev \
-        libpicotts-utils
+        libttspico-utils
         
 2. Home Assistant
 ---------------------

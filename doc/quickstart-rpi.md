@@ -52,7 +52,7 @@ The following dependencies should be installed from the Raspbian repositories:
     * `libatlas-dev`
     * `libatlas-base-dev`
 * rhasspy
-    * `libpicotts-utils`
+    * `libttspico-utils`
     
 You can install them all at once with a single command:
 
@@ -60,7 +60,7 @@ You can install them all at once with a single command:
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
         libatlas-dev libatlas-base-dev \
-        libpicotts-utils
+        libttspico-utils
         
 If the `libpictoos-utils` package is unavailable. You will find it and its
 dependencies in in the `rhasspy-tools` repository mentioned below. Once you have
