@@ -13,7 +13,7 @@ from homeassistant.helpers import intent, config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['mycroft-precise==0.1.1', 'precise-runner==0.2.1']
+REQUIREMENTS = ['mycroft-precise==0.2.0', 'precise-runner==0.2.1']
 
 DOMAIN = 'hotword_precise'
 
