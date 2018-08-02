@@ -49,6 +49,7 @@ You can install them all at once with a single command:
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
+        libtcl8.6 \
         libttspico-utils
         
 2. Home Assistant

@@ -57,6 +57,7 @@ You can install them all at once with a single command:
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
         libatlas-dev libatlas-base-dev \
+        libtcl8.6 \
         libttspico-utils sox
         
 2. Home Assistant
