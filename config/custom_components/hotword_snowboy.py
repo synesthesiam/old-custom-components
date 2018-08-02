@@ -21,9 +21,19 @@ DOMAIN = 'hotword_snowboy'
 # Config
 # ------
 
+# Path to the snowboy hotword model file (.umdl or .pmdl)
 CONF_MODEL = 'model'
+
+# Sensitivity of detection (defaults to 0.5).
+# Ranges from 0-1.
 CONF_SENSITIVITY = 'sensitivity'
+
+# Amount of audio gain when recording (defaults to 1.0)
 CONF_AUDIO_GAIN = 'audio_gain'
+
+# ----------------------
+# Configuration defaults
+# ----------------------
 
 DEFAULT_NAME = 'hotword_snowboy'
 DEFAULT_SENSITIVITY = 0.5
@@ -45,10 +55,16 @@ CONFIG_SCHEMA = vol.Schema({
 
 SERVICE_LISTEN = 'listen'
 
+# Represents the hotword detector
 OBJECT_SNOWBOY = '%s.snowboy' % DOMAIN
+
+# Not doing anything
 STATE_IDLE = 'idle'
+
+# Listening for the hotword
 STATE_LISTENING = 'listening'
 
+# Fired when the hotword is detected
 EVENT_HOTWORD_DETECTED = 'hotword_detected'
 
 # -----------------------------------------------------------------------------

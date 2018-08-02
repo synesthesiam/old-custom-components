@@ -25,20 +25,45 @@ DOMAIN = 'command_listener'
 # Config
 # ------
 
+# Index of the PyAudio device to listen on (-1 for default microphone)
 CONF_DEVICE_INDEX = 'device_index'
+
+# Microphone sample rate (defaults to 16Khz)
 CONF_SAMPLE_RATE = 'sample_rate'
+
+# Microphone sample width (defaults to 2 bytes or 16-bits)
 CONF_SAMPLE_WIDTH = 'sample_width'
+
+# Microphone channels (defaults to 1 or mono)
 CONF_CHANNELS = 'channels'
+
+# Size of recording buffer (defaults to 480 or 30 ms at the default sample rate/width).
+# *MUST* be 10, 20, or 30 ms for webrtcvad to work.
 CONF_CHUNK_SIZE = 'chunk_size'
 
+# Sensitivity of voice activity detection (defaults to 0).
+# Ranges from 0-3 where 3 is the most aggressive (fewer false positives).
 CONF_VAD_MODE = 'vad_mode'
 
+# Minimum number of seconds of speech to record (defaults to 2).
+# Anything below this is ignored (avoids hisses and pops).
 CONF_MIN_SEC = 'min_sec'
+
+# Number of seconds of silence to record *after* command (defaults to 0.5 seconds).
+# Lets the command listener know when the command is finished.
 CONF_SILENCE_SEC = 'silence_sec'
+
+# Total number of seconds to record before timing out (defaults to 30 seconds).
 CONF_TIMEOUT_SEC = 'timeout_sec'
 
-# URL to POST recorded WAV data to
+# URL to POST recorded WAV data to when finished recording.
+# This will probably be something like http://server:8123/api/stt_pocketsphinx
+# if you're using stt_pocketsphinx on a server.
 CONF_URL = 'url'
+
+# ----------------------
+# Configuration defaults
+# ----------------------
 
 DEFAULT_NAME = 'command_listener'
 DEFAULT_DEVICE_INDEX = -1    # default microphone
@@ -47,7 +72,7 @@ DEFAULT_SAMPLE_WIDTH = 2     # 16-bit
 DEFAULT_CHANNELS = 1         # mono
 DEFAULT_CHUNK_SIZE = 480     # 30 ms
 
-DEFAULT_VAD_MODE = 0         # 0-3 (agressiveness)
+DEFAULT_VAD_MODE = 0         # 0-3 (aggressiveness)
 
 DEFAULT_MIN_SEC = 2.0        # min seconds that command must last
 DEFAULT_SILENCE_SEC = 0.5    # min seconds of silence after command
@@ -80,7 +105,12 @@ CONFIG_SCHEMA = vol.Schema({
 
 SERVICE_LISTEN = 'listen'
 
+# File path to write WAV file after recording (optional).
 ATTR_FILENAME = 'filename'
+
+# URL to POST WAV data to after recording (optional).
+# If no filename and no URL is provided when listen is called, the URL from the
+# configuration is used (CONF_URL).
 ATTR_URL = 'url'
 
 SCHEMA_SERVICE_LISTEN = vol.Schema({
@@ -88,10 +118,16 @@ SCHEMA_SERVICE_LISTEN = vol.Schema({
     vol.Optional(ATTR_URL): cv.string
 })
 
+# Represents the command listener
 OBJECT_MICROPHONE = '%s.microphone' % DOMAIN
+
+# Waiting for the listen service to be called
 STATE_IDLE = 'idle'
+
+# Currently recording a command
 STATE_RECORDING = 'recording'
 
+# Fired when a command has been successfully recorded
 EVENT_SPEECH_RECORDED = 'speech_recorded'
 
 class CommandListener(object):

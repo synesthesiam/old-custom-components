@@ -21,14 +21,45 @@ DOMAIN = 'hotword_pocketsphinx'
 # Config
 # ------
 
+# Path to pocketsphinx acoustic model (-hmm).
+# Probably $RHASSPY_TOOLS/pocketsphinx/cmusphinx-en-us-5.2
 CONF_ACOUSTIC_MODEL = 'acoustic_model'
+
+# Path to pocketsphinx word pronunciation dictionary (-dict).
+# Probably $RHASSPY_TOOLS/pocketsphinx/cmudict-en-us.dict
 CONF_DICTIONARY = 'dictionary'
-CONF_HOTWORD = 'hotword'  # 3-4 syllables recommended
+
+# Word or phrase to use for hot/wake word.
+# CMU recommends this be 3-4 syllables long.
+CONF_HOTWORD = 'hotword'
+
+# Likelihood of hotword occuring (tune to lower false positive rate).
+# CMU recommends this be in the range 1e-50 to 1e-5.
+# Defaults to 1e-40.
 CONF_THRESHOLD = 'threshold'
 
+# Name of the audio device to record on.
+#
+# This string is passed directly to the Ad constructor for pocketsphinx's audio
+# device (technically sphinxbase's).
+#
+# The format depends on whether you're using ALSA or PulseAudio, and even then
+# it's incredibly confusing. You can force sphinxbase to use ALSA or PulseAudio
+# by editing sphinxbase/__init__.py in your virtual environment if you're
+# feeling brave.
+#
+# The default value of None selects the default microphone.
 CONF_AUDIO_DEVICE = 'audio_device'
+
+# Microphone sample rate (defaults to 16Khz)
 CONF_SAMPLE_RATE = 'sample_rate'
+
+# Size of recording buffer (defaults to 2048).
 CONF_BUFFER_SIZE = 'buffer_size'
+
+# ----------------------
+# Configuration defaults
+# ----------------------
 
 DEFAULT_NAME = 'hotword_pocketsphinx'
 DEFAULT_ACOUSTIC_MODEL = '/usr/share/pocketsphinx/model/en-us/en-us/'
@@ -61,10 +92,16 @@ CONFIG_SCHEMA = vol.Schema({
 
 SERVICE_LISTEN = 'listen'
 
+# Represents the hotword detector
 OBJECT_DECODER = '%s.decoder' % DOMAIN
+
+# Not doing anything
 STATE_IDLE = 'idle'
+
+# Listening for the hotword
 STATE_LISTENING = 'listening'
 
+# Fired when the hotword is detected
 EVENT_HOTWORD_DETECTED = 'hotword_detected'
 
 # -----------------------------------------------------------------------------

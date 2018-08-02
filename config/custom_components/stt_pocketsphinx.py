@@ -23,6 +23,14 @@ _LOGGER = logging.getLogger(__name__)
 REQUIREMENTS = ['pocketsphinx==0.1.15', 'webrtcvad==2.0.10', 'PyAudio>=0.2.8']
 DEPENDENCIES = ['http']
 
+# -----------------------------------------------------------------------------
+# NOTE: If you have sox installed and in your PATH, stt_pocketsphinx will
+# automatically convert WAV files that are not 16-bit 16Khz mono to the
+# appropriate format.
+#
+# More info on sox: http://sox.sourceforge.net
+# -----------------------------------------------------------------------------
+
 DOMAIN = 'stt_pocketsphinx'
 STT_API_ENDPOINT = '/api/%s' % DOMAIN
 
@@ -30,18 +38,46 @@ STT_API_ENDPOINT = '/api/%s' % DOMAIN
 # Config
 # ------
 
+# Path to pocketsphinx acoustic model (-hmm).
+# Probably $RHASSPY_TOOLS/pocketsphinx/cmusphinx-en-us-5.2
 CONF_ACOUSTIC_MODEL = 'acoustic_model'
+
+# Path to pocketsphinx language model (-lm).
+# Probably $RHASSPY_ASSISTANT/data/mixed.lm
 CONF_LANGUAGE_MODEL = 'language_model'
+
+# Path to pocketsphinx word pronunciation dictionary (-dict).
+# Probably $RHASSPY_TOOLS/pocketsphinx/cmudict-en-us.dict
 CONF_DICTIONARY = 'dictionary'
 
+# Index of the PyAudio device to listen on (-1 for default microphone)
 CONF_AUDIO_DEVICE = 'audio_device'
+
+# Microphone sample rate (defaults to 16Khz)
 CONF_SAMPLE_RATE = 'sample_rate'
+
+# Size of recording buffer (defaults to 480 or 30 ms at the default sample rate/width).
+# *MUST* be 10, 20, or 30 ms for webrtcvad to work.
 CONF_BUFFER_SIZE = 'buffer_size'
 
+# Sensitivity of voice activity detection (defaults to 0).
+# Ranges from 0-3 where 3 is the most aggressive (fewer false positives).
 CONF_VAD_MODE = 'vad_mode'
+
+# Minimum number of seconds of speech to record (defaults to 2).
+# Anything below this is ignored (avoids hisses and pops).
 CONF_MIN_SEC = 'min_sec'
+
+# Number of seconds of silence to record *after* command (defaults to 0.5 seconds).
+# Lets the command listener know when the command is finished.
 CONF_SILENCE_SEC = 'silence_sec'
+
+# Total number of seconds to record before timing out (defaults to 30 seconds).
 CONF_TIMEOUT_SEC = 'timeout_sec'
+
+# ----------------------
+# Configuration defaults
+# ----------------------
 
 DEFAULT_NAME = 'stt_pocketsphinx'
 DEFAULT_ACOUSTIC_MODEL = '/usr/share/pocketsphinx/model/en-us/en-us/'
@@ -80,10 +116,16 @@ CONFIG_SCHEMA = vol.Schema({
 # Services
 # --------
 
+# Starts listening for commands on the configured microphone
 SERVICE_LISTEN = 'listen'
+
+# Performs speech to text with recorded (or POSTed) WAV data
 SERVICE_DECODE = 'decode_wav'
 
+# File path to read WAV data from
 ATTR_FILENAME = 'filename'
+
+# Raw WAV data to load directly (includes header, etc.)
 ATTR_DATA = 'data'
 
 SCHEMA_SERVICE_DECODE = vol.Schema({
@@ -91,15 +133,26 @@ SCHEMA_SERVICE_DECODE = vol.Schema({
     vol.Optional(ATTR_DATA): list
 })
 
+# Represents the listener and decoder
 OBJECT_POCKETSPHINX = '%s.pocketsphinx' % DOMAIN
+
+# Not listening or decoding
 STATE_IDLE = 'idle'
+
+# Currently recording a command
 STATE_LISTENING = 'listening'
+
+# Currently decoding WAV data (speech to text)
 STATE_DECODING = 'decoding'
 
+# Fired when command has finished recording
 EVENT_SPEECH_RECORDED = 'speech_recorded'
+
+# Fired when decoding has finished
 EVENT_SPEECH_TO_TEXT = 'speech_to_text'
 
 # -----------------------------------------------------------------------------
+
 @asyncio.coroutine
 def async_setup(hass, config):
     name = config[DOMAIN].get(CONF_NAME, DEFAULT_NAME)
@@ -408,13 +461,13 @@ def async_setup(hass, config):
 
 
 class ExternalSpeechView(HomeAssistantView):
-    """Handle speech to text requests."""
+    """Handle speech to text requests via HTTP."""
 
     url = STT_API_ENDPOINT
     name = 'api:%s' % DOMAIN
 
     async def post(self, request):
-        """Handle speech to text."""
+        """Handle speech to text from POSTed WAV data."""
         hass = request.app['hass']
         data = await request.read()
 

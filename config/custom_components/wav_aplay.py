@@ -19,6 +19,8 @@ DOMAIN = 'wav_aplay'
 # --------
 
 SERVICE_PLAY_WAV = 'play_wav'
+
+# Path to WAV file
 ATTR_FILENAME = 'filename'
 
 SCHEMA_SERVICE_PLAY_WAV = vol.Schema({

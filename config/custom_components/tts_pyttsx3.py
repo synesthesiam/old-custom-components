@@ -19,6 +19,7 @@ DOMAIN = 'tts_pyttsx3'
 # Config
 # ------
 
+# Name of the voice to use (defaults to the default voice)
 CONF_VOICE = 'voice'
 
 CONFIG_SCHEMA = vol.Schema({
@@ -32,7 +33,11 @@ CONFIG_SCHEMA = vol.Schema({
 # --------
 
 SERVICE_SAY = 'say'
+
+# Text to speak
 ATTR_MESSAGE = 'message'
+
+# Voice to use (uses CONF_VOICE is not present)
 ATTR_VOICE = 'voice'
 
 SCHEMA_SERVICE_SAY = vol.Schema({

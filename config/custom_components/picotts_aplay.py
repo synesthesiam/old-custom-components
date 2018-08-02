@@ -20,7 +20,11 @@ DOMAIN = 'picotts_aplay'
 # --------
 
 SERVICE_SAY = 'say'
+
+# Text to speak
 ATTR_MESSAGE = 'message'
+
+# Language to use (defaults to en-US)
 ATTR_LANGUAGE = 'language'
 
 SCHEMA_SERVICE_SAY = vol.Schema({

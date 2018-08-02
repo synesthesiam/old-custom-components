@@ -13,7 +13,8 @@ from homeassistant.helpers import intent, config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['spacy==2.0.11', 'sklearn-crfsuite==0.3.6', 'scikit-learn==0.19.1', 'rasa-nlu==0.12.3']
+REQUIREMENTS = ['spacy==2.0.11', 'sklearn-crfsuite==0.3.6',
+                'scikit-learn==0.19.1', 'rasa-nlu==0.12.3']
 
 DOMAIN = 'rasa_nlu'
 DEFAULT_NAME = 'rasa_nlu'
@@ -22,6 +23,7 @@ DEFAULT_NAME = 'rasa_nlu'
 # Config
 # ------
 
+# Path to directory where rasaNLU stores projects
 CONF_PROJECT_DIR = 'project_dir'
 
 CONFIG_SCHEMA = vol.Schema({
@@ -38,7 +40,10 @@ CONFIG_SCHEMA = vol.Schema({
 
 SERVICE_PARSE = 'parse'
 
+# Text to parse
 ATTR_MESSAGE = 'message'
+
+# Name of project to use
 ATTR_PROJECT_NAME = 'project'
 
 SCHEMA_SERVICE_PARSE = vol.Schema({
@@ -50,8 +55,13 @@ OBJECT_RECOGNIZER = '%s.recognizer' % DOMAIN
 STATE_IDLE = 'idle'
 STATE_THINKING = 'thinking'
 
+# Fired when an intent is recognized
 EVENT_KNOWN_INTENT = 'known_intent'
+
+# Fired when an intent is *not* recognized
 EVENT_UNKNOWN_INTENT = 'unknown_intent'
+
+# -----------------------------------------------------------------------------
 
 class RasaIntentRecognizer(object):
     import rasa_nlu

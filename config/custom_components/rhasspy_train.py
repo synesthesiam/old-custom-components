@@ -77,7 +77,10 @@ CONF_LM_MIXED = 'language_model_mixed'
 # Percentage of large language model to "mix" into smaller model (defaults to 5%)
 CONF_LM_LAMBDA = 'language_model_mix_percent'
 
+# ----------------------
 # Configuration defaults
+# ----------------------
+
 DEFAULT_NGRAM = 'ngram'
 DEFAULT_NGRAM_COUNT = 'ngram-count'
 DEFAULT_PHONETISAURUS = 'phonetisaurus-g2p'

@@ -21,6 +21,7 @@ DOMAIN = 'hotword_precise'
 # Config
 # ------
 
+# Path to the Mycroft Precise hotword model file (.pb)
 CONF_MODEL = 'model'
 
 # From 0.0 to 1.0, relates to the network output level required to consider a
@@ -30,6 +31,10 @@ CONF_SENSITIVITY = 'sensitivity'
 # Number of chunk activations needed to trigger on_activation.
 # Higher values add latency but reduce false positives.
 CONF_TRIGGER_LEVEL = 'trigger_level'
+
+# ----------------------
+# Configuration defaults
+# ----------------------
 
 DEFAULT_NAME = 'hotword_precise'
 DEFAULT_SENSITIVITY = 0.5
@@ -51,10 +56,16 @@ CONFIG_SCHEMA = vol.Schema({
 
 SERVICE_LISTEN = 'listen'
 
+# Represents the hotword detector
 OBJECT_DECODER = '%s.decoder' % DOMAIN
+
+# Not doing anything
 STATE_IDLE = 'idle'
+
+# Listening for the hotword
 STATE_LISTENING = 'listening'
 
+# Fired when the hotword is detected
 EVENT_HOTWORD_DETECTED = 'hotword_detected'
 
 # -----------------------------------------------------------------------------
