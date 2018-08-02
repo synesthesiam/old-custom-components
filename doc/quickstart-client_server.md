@@ -46,6 +46,7 @@ Install these packages first from your distribution's repositories:
     * `libatlas-base-dev`
 * rhasspy
     * `libttspico-utils`
+    * `sox`
     
 You can install them all at once with a single command:
 
@@ -54,7 +55,7 @@ You can install them all at once with a single command:
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
         libatlas-dev libatlas-base-dev \
-        libttspico-utils
+        libttspico-utils sox
         
 2. Home Assistant
 ---------------------
@@ -78,7 +79,8 @@ Open the virtual environment and activate it:
     
 Install Home Assistant:
 
-    python3 -m pip install wheel homeassistant
+    python3 -m pip install wheel
+    python3 -m pip install homeassistant
     
 Run Home Assistant (wait for it to install dependencies):
 

@@ -9,28 +9,20 @@ The following Home Assistant components from rhasspy will be used:
     * Low resource usage and low false positive rate
 * `stt_pocketsphinx`
     * Recommend using the PTM acoustic model (`cmusphinx-en-us-ptm-5.2`) for quicker decoding
-* `rasa_nlu`
-    * Recommend using `en_core_web_sm` language model for `spaCy` to limit memory usage
 * `picotts_aplay`
     * Alternative to existing [tts.picotts](https://www.home-assistant.io/components/tts.picotts) component
     * Plays text-to-speech results directly with [aplay](https://linux.die.net/man/1/aplay)
 * `wav_aplay`
     * Alternative to existing [media_player.vlc](https://www.home-assistant.io/components/media_player.vlc) component
     * Plays WAV files directly with [aplay](https://linux.die.net/man/1/aplay)
-
-Extend Swap Space
----------------------
-
-Due to the limited RAM on a Raspberry Pi (1GB), the swap space must be extended
-for the installation of `spaCy` and `rasaNLU`. Without this extension, the
-installation of the Python dependencies will likely fail (i.e., pip will
-suddenly die).
-
-This is fairly simple to do in Raspbian:
-
-1. Edit /etc/dphys-swapfile
-2. Change `CONF_SWAPSIZE` to something large, like 2048
-3. Reboot
+    
+Rather than using the `rasa_nlu` component (which requires `spaCy` and a
+language model), we'll use the built-in `conversation` component from Home
+Assistant. While not as flexible as `rasaNLU`, it's easy to configured and
+automatically recognizes sentences like "turn on X" or "turn off the Y" for any
+switches you have configured. You **MUST** add examples of these sentences to
+Rhasspy's `examples.md` file for the speech recognizer to recognize them! See
+the `Extending Rhasspy` section below for more details.
 
 Debian Dependencies
 -----------------------
@@ -48,9 +40,8 @@ The following dependencies should be installed from the Raspbian repositories:
     * `libasound2-dev`
     * `libpulse-dev`
     * `swig`
-* rasaNLU
-    * `libatlas-dev`
-    * `libatlas-base-dev`
+* PyAudio
+    * `portaudio19-dev`
 * rhasspy
     * `libttspico-utils`
     
@@ -59,16 +50,9 @@ You can install them all at once with a single command:
     sudo apt-get install build-essential \
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
-        libatlas-dev libatlas-base-dev \
+        portaudio19-dev \
         libttspico-utils
         
-If the `libpictoos-utils` package is unavailable. You will find it and its
-dependencies in in the `rhasspy-tools` repository mentioned below. Once you have
-`rhasspy-tools` downloaded, you can install picotts with:
-
-    cd rhasspy-tools/pico-tts
-    sudo dpkg -i *.deb
-    
 2. Home Assistant
 ---------------------
 
@@ -90,7 +74,8 @@ environment](https://www.home-assistant.io/docs/installation/virtualenv/).
     
 3. Install Home Assistant:
 
-    python3 -m pip install wheel homeassistant
+    python3 -m pip install wheel
+    python3 -m pip install homeassistant
     
 4. Run Home Assistant (wait for it to install dependencies):
 
@@ -148,15 +133,24 @@ full path to them during configuration.
     source bin/activate
     hass -c config
      
-7. Install a language model for `spaCy`
-
-    cd homeassistant
-    source bin/activate
-    python3 -m spacy download en
-    
 You can now test rhasspy with phrases like:
 
 * "okay rhasspy" (wait for beep) "what time is it?"
 * "okay rhasspy" (wait for beep) "turn on the living room lamp"
 * "okay rhasspy" (wait for beep) "is the garage door open?"
 * "okay rhasspy" (wait for beep) "what's the temperature like?"
+
+4. Extending Rhasspy
+------------------------
+
+If you want to add new phrases/intents, you need to:
+
+1. Edit `configuration.yaml` (for Home Assistant)
+    * Add new intents or sentences to the `conversation` component configuration
+    * Add scripted actions to the `intent_script` component configuration 
+2. Edit `examples.md` (for Rhasspy)
+    * `examples.md` is usually in `$RHASSPY_ASSISTANT/data/examples.md`
+    * Add new intents and sentences (same as in `configuration.yaml` under `conversation`)
+    * Also add sentences for `HassTurnOn` and `HassTurnOff` (e.g., "turn on the garage light")
+3. Re-train Rhasspy by calling the `rhasspy_train.train` service from the Home Assistant front end
+4. Restart Home Assistant

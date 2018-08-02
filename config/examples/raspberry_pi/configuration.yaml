@@ -43,6 +43,25 @@ wav_aplay:
 hotword_snowboy:
   model: $RHASSPY_ASSISTANT/wake/snowboy/okay_rhasspy.pmdl
 
+# Alternative to rasaNLU; included with Home Assistant.
+# The HassTurnOn and HassTurnOff events are automatically filled in.
+conversation:
+  intents:
+    GetTime:
+      - what time is it
+      - tell me the current time
+      - what time is it right now
+      - what's the time
+    GetTemperature:
+      - what's the temperature
+      - how hot is it
+      - how cold is it
+      - what is the current temperature
+    GarageOpenClosed:
+      - is the garage door open
+      - is the garage door closed
+      - is the garage door open or closed
+
 # Service for training rhasspy speech/intent recognizers
 rhasspy_train:
   ngram_path: $RHASSPY_TOOLS/srilm/bin/armv7l/ngram
@@ -68,10 +87,6 @@ stt_pocketsphinx:
   acoustic_model: $RHASSPY_TOOLS/pocketsphinx/cmusphinx-en-us-ptm-5.2
   language_model: $RHASSPY_ASSISTANT/data/examples.lm
   dictionary: $RHASSPY_ASSISTANT/data/mixed.dict
-
-# Recognize intents with rasaNLU.
-rasa_nlu:
-  project_dir: $RHASSPY_ASSISTANT/data/projects
 
 # Responsd to intents from intent recognizer.
 intent_script:

@@ -70,7 +70,8 @@ Open the virtual environment and activate it:
     
 Install Home Assistant:
 
-    python3 -m pip install wheel homeassistant
+    python3 -m pip install wheel
+    python3 -m pip install homeassistant
     
 Run Home Assistant (wait for it to install dependencies):
 
