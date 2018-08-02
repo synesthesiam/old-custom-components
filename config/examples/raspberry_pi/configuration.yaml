@@ -68,10 +68,8 @@ rhasspy_train:
   ngram_count_path: $RHASSPY_TOOLS/srilm/bin/armv7l/ngram-count
   phonetisaurus_path: $RHASSPY_TOOLS/phonetisaurus/phonetisaurus-armv7l
   phonetisaurus_fst: $RHASSPY_TOOLS/phonetisaurus/etc/g014b2b.fst
-  project_dir: $RHASSPY_ASSISTANT/data/projects
   example_files:
     - $RHASSPY_ASSISTANT/data/examples.md
-  rasa_config: $RHASSPY_ASSISTANT/etc/rasa/config_spacy.yml
   dictionary_files:
     - $RHASSPY_TOOLS/pocketsphinx/cmudict-en-us.dict
   dictionary_guess: $RHASSPY_ASSISTANT/data/guess.dict

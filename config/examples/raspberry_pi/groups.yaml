@@ -23,5 +23,3 @@ rhasspy:
     - hotword_snowboy.decoder
     - stt_pocketsphinx.pocketsphinx
     - sensor.last_text
-    - rasa_nlu.recognizer
-    - sensor.last_intent

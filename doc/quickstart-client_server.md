@@ -41,16 +41,18 @@ Install these packages first from your distribution's repositories:
     * `swig`
 * PyAudio
     * `portaudio19-dev`
-* rasaNLU
+* rasaNLU/snowboy
     * `libatlas-dev`
     * `libatlas-base-dev`
+* SRILM
+    * `libtcl8.6`
 * rhasspy
     * `libttspico-utils`
     * `sox`
     
 You can install them all at once with a single command:
 
-    sudo apt-get install build-essential \
+    sudo apt-get install git build-essential \
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
@@ -128,6 +130,12 @@ Assistant configuration. You **must** replace the following placeholders in
 * `$SERVER_URL` - replace with the host name of the server where Home Assistant is running (where speech/intent recognition will happen)
 * `$RHASSPY_ASSISTANT` - replace with the full path to the `rhasspy-assistant` directory
 * `$RHASSPY_TOOLS` - replace with the full path to the `rhasspy-tools` directory
+
+Install snowboy:
+
+    cd homeassistant
+    source bin/activate
+    python3 -m pip install https://github.com/Kitt-AI/snowboy/archive/v1.3.0.tar.gz
      
 Run Home Assistant (wait for it to install dependencies):
  

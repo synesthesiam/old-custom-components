@@ -31,6 +31,7 @@ The following dependencies should be installed from the Raspbian repositories:
 
 * General
     * `build-essential`
+    * `git`
 * Python
     * `python3`
     * `python3-dev`
@@ -44,14 +45,20 @@ The following dependencies should be installed from the Raspbian repositories:
     * `portaudio19-dev`
 * rhasspy
     * `libttspico-utils`
+* SRILM
+    * `libtcl8.6`
+* snowboy
+    * `libatlas-dev`
+    * `libatlas-base-dev`
     
 You can install them all at once with a single command:
 
-    sudo apt-get install build-essential \
+    sudo apt-get install git build-essential \
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \
-        libttspico-utils
+        libttspico-utils \
+        libatlas-dev libatlas-base-dev
         
 2. Home Assistant
 ---------------------
@@ -112,7 +119,7 @@ full path to them during configuration.
    your Home Assistant configuration directory (where `configuration.yaml`
    resides).
 
-4. Incorporate the files in `rhasspy-assistant/config/examples/single_machine`
+4. Incorporate the files in `rhasspy-assistant/config/examples/raspberry_pi`
    into your Home Assistant configuration. You **must** replace the following
    placeholders in `configuration.yaml` and `automations.yaml`:
    

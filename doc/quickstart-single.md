@@ -43,10 +43,12 @@ Install these packages first from your distribution's repositories:
     * `libatlas-base-dev`
 * rhasspy
     * `libttspico-utils`
+* SRILM
+    * `libtcl8.6`
     
 You can install them all at once with a single command:
 
-    sudo apt-get install build-essential \
+    sudo apt-get install git build-essential \
         python3 python3-dev python3-pip python3-venv \
         libasound2-dev libpulse-dev swig \
         portaudio19-dev \

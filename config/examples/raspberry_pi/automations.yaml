@@ -27,3 +27,17 @@
     - service: wav_aplay.play_wav
       data:
         filename: $RHASSPY_ASSISTANT/etc/wav/command_recorded.wav
+    - service: conversation.process
+      data_template:
+        text: "{{ trigger.event.data['text'] }}"
+    - service: hotword_snowboy.listen
+
+# Pass text from pocketsphinx to the intent recognizer.
+- alias: "speech to text -> intent recognition"
+  trigger:
+    platform: event
+    event_type: speech_to_text
+  action:
+    - service: conversation.process
+      data_template:
+        text: "{{ trigger.event.data['text'] }}"
