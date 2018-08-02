@@ -56,7 +56,7 @@ CONFIG_SCHEMA = vol.Schema({
 SERVICE_LISTEN = 'listen'
 
 # Represents the hotword detector
-OBJECT_SNOWBOY = '%s.snowboy' % DOMAIN
+OBJECT_SNOWBOY = '%s.decoder' % DOMAIN
 
 # Not doing anything
 STATE_IDLE = 'idle'
