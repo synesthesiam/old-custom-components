@@ -81,30 +81,43 @@ def async_setup(hass, config):
     terminated = False
     detected_event = threading.Event()
 
+    state_attrs = {
+        'friendly_name': 'Hotword',
+        'icon': 'mdi:microphone'
+    }
+
     @asyncio.coroutine
     def async_listen(call):
-        nonlocal detector, detected_event
+        nonlocal detected_event, terminated
         from snowboy import snowboydecoder
-        detector = snowboydecoder.HotwordDetector(
-            model, sensitivity=sensitivity, audio_gain=audio_gain)
+
+        interrupted = False
+
+        def interrupt_callback():
+            nonlocal interrupted, terminated
+            return interrupted or terminated
 
         def detect():
-            detector.start(lambda: detected_event.set())
+            detector = snowboydecoder.HotwordDetector(
+                model, sensitivity=sensitivity, audio_gain=audio_gain)
+
+            detector.start(lambda: detected_event.set(),
+                           interrupt_check=interrupt_callback,
+                           sleep_time=0.03)
+
+            detector.terminate()
 
         # Run detector in a separate thread
+        detected_event.clear()
         thread = threading.Thread(target=detect, daemon=True)
-        hass.states.async_set(OBJECT_SNOWBOY, STATE_LISTENING)
+        hass.states.async_set(OBJECT_SNOWBOY, STATE_LISTENING, state_attrs)
 
         thread.start()
         yield from asyncio.get_event_loop().run_in_executor(None, detected_event.wait)
+        interrupted = True
 
         if not terminated:
-            detector.terminate()
-            detector = None
-
-            thread.join()
-
-            hass.states.async_set(OBJECT_SNOWBOY, STATE_IDLE)
+            hass.states.async_set(OBJECT_SNOWBOY, STATE_IDLE, state_attrs)
 
             # Fire detected event
             hass.bus.async_fire(EVENT_HOTWORD_DETECTED, {
@@ -113,18 +126,13 @@ def async_setup(hass, config):
             })
 
     hass.services.async_register(DOMAIN, SERVICE_LISTEN, async_listen)
-    hass.states.async_set(OBJECT_SNOWBOY, STATE_IDLE)
+    hass.states.async_set(OBJECT_SNOWBOY, STATE_IDLE, state_attrs)
 
     # Make sure snowboy terminates property when home assistant stops
     @asyncio.coroutine
     def async_terminate(event):
-        nonlocal detector, detected_event, terminated
+        nonlocal terminated
         terminated = True
-
-        if detector is not None:
-            detector.terminate()
-            detector = None
-
         detected_event.set()
 
     hass.bus.async_listen(EVENT_HOMEASSISTANT_STOP, async_terminate)
