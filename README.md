@@ -49,8 +49,11 @@ the tools found in
 [rhasspy-tools](https://github.com/synesthesiam/rhasspy-tools). There are
 [several
 quickstarts](https://github.com/synesthesiam/rhasspy-assistant/tree/master/doc)
-that describe the installation process in detail for different scenarios. In
-general, the installation process involves:
+that describe the installation process in detail for different scenarios and [a
+more detailed guide for the Raspberry
+Pi](https://github.com/synesthesiam/rhasspy-assistant/blob/master/doc/detailed-rpi.md).
+
+In general, the installation process involves:
 
 1. Installing system dependencies for building Python libraries
 2. Installing Home Assistant (if you don't have it yet)
