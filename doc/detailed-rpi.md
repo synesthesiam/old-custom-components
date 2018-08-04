@@ -333,3 +333,12 @@ happen in the web interface.
 The `intent_script` portion defines how Home Assistant responds to the *intents*
 that the `conversation` component recognizes (after `stt_pocketsphinx` decodes
 your speech). The intent names and actions can be anything you want!
+
+Next Steps
+------------
+
+To get the full Rhasspy experience, you'll want to [use the rasa_nlu
+component](https://github.com/synesthesiam/rhasspy-assistant/blob/master/doc/upgrading-to-rasa.md)
+instead of `conversation`. Learning about [Rhasspy's event
+flow](https://github.com/synesthesiam/rhasspy-assistant/blob/master/doc/rhasspy-events.md)
+is also a good idea for further customization.
