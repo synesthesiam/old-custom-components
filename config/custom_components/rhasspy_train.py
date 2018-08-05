@@ -194,6 +194,7 @@ def async_setup(hass, config):
                 _LOGGER.info('Finished training')
             finally:
                 trained_event.set()
+                hass.bus.async_fire(EVENT_RHASSPY_TRAINED)
                 hass.states.async_set(OBJECT_TRAINER, STATE_IDLE, state_attrs)
 
         thread = threading.Thread(target=train, daemon=True)
