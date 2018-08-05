@@ -120,7 +120,20 @@ CONFIG_SCHEMA = vol.Schema({
 # Services
 # --------
 
+# Represents the trainer
+OBJECT_TRAINER = '%s.trainer' % DOMAIN
+
+# Not training
+STATE_IDLE = 'idle'
+
+# Training
+STATE_TRAINING = 'training'
+
+# Service to re-train rhasspy
 SERVICE_TRAIN = 'train'
+
+# Fired when training has been completed
+EVENT_RHASSPY_TRAINED = 'rhasspy_trained'
 
 @asyncio.coroutine
 def async_setup(hass, config):
@@ -152,12 +165,18 @@ def async_setup(hass, config):
     lm_mixed = os.path.expanduser(config[DOMAIN][CONF_LM_MIXED])
     lm_lambda = config[DOMAIN].get(CONF_LM_LAMBDA, DEFAULT_LM_LAMBDA)
 
+    state_attrs = {
+        'friendly_name': 'Trainer',
+        'icon': 'mdi:paperclip'
+    }
+
     @asyncio.coroutine
     def async_train(call):
         trained_event = threading.Event()
 
         def train():
             _LOGGER.info('Starting training')
+            hass.states.async_set(OBJECT_TRAINER, STATE_TRAINING, state_attrs)
 
             try:
                 # Optionally train project for rasaNLU
@@ -175,6 +194,7 @@ def async_setup(hass, config):
                 _LOGGER.info('Finished training')
             finally:
                 trained_event.set()
+                hass.states.async_set(OBJECT_TRAINER, STATE_IDLE, state_attrs)
 
         thread = threading.Thread(target=train, daemon=True)
         thread.start()
@@ -183,6 +203,8 @@ def async_setup(hass, config):
         yield from loop.run_in_executor(None, trained_event.wait)
 
     hass.services.async_register(DOMAIN, SERVICE_TRAIN, async_train)
+
+    hass.states.async_set(OBJECT_TRAINER, STATE_IDLE, state_attrs)
 
     _LOGGER.info('Started')
 

@@ -133,11 +133,17 @@ SCHEMA_SERVICE_DECODE = vol.Schema({
     vol.Optional(ATTR_DATA): list
 })
 
+# Clears cached decoder (used after re-training)
+SERVICE_RESET = 'reset'
+
 # Represents the listener and decoder
 OBJECT_POCKETSPHINX = '%s.pocketsphinx' % DOMAIN
 
 # Not listening or decoding
 STATE_IDLE = 'idle'
+
+# Loading decoder
+STATE_LOADING = 'loading'
 
 # Currently recording a command
 STATE_LISTENING = 'listening'
@@ -182,12 +188,9 @@ def async_setup(hass, config):
     timeout_sec = config[DOMAIN].get(CONF_TIMEOUT_SEC, DEFAULT_TIMEOUT_SEC)
     seconds_per_buffer = buffer_size / sample_rate
 
-    # Create speech-to-text decoder
+    # Speech-to-text decoder will be loaded on the fly
     from pocketsphinx import Pocketsphinx, Ad
-    decoder = Pocketsphinx(
-        hmm=acoustic_model,
-        lm=language_model,
-        dic=dictionary)
+    decoder = None
 
     import pyaudio
     data_format = pyaudio.get_format_from_width(sample_width)
@@ -311,7 +314,19 @@ def async_setup(hass, config):
             hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
             def decode():
-                nonlocal decoded_phrase
+                nonlocal decoder, decoded_phrase
+
+                # Dynamically load decoder
+                if decoder is None:
+                    _LOGGER.debug('Loading decoder')
+                    hass.states.async_set(OBJECT_POCKETSPHINX, STATE_LOADING, state_attrs)
+                    decoder = Pocketsphinx(
+                        hmm=acoustic_model,
+                        lm=language_model,
+                        dic=dictionary)
+                    hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
+
+                # Do actual decoding
                 with decoder.start_utterance():
                     decoder.process_raw(recorded_data, False, True)  # full utterance
                     hyp = decoder.hyp()
@@ -359,7 +374,7 @@ def async_setup(hass, config):
         hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
         def decode():
-            nonlocal decoded_phrase, data, filename
+            nonlocal decoder, decoded_phrase, data, filename
 
             # Check if WAV is in the correct format.
             # Convert with sox if not.
@@ -402,6 +417,16 @@ def async_setup(hass, config):
                                 # Clean up temporary file
                                 del temp_input_file
 
+            # Dynamically load decoder
+            if decoder is None:
+                _LOGGER.debug('Loading decoder')
+                hass.states.async_set(OBJECT_POCKETSPHINX, STATE_LOADING, state_attrs)
+                decoder = Pocketsphinx(
+                    hmm=acoustic_model,
+                    lm=language_model,
+                    dic=dictionary)
+                hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
+
             # Process WAV data as a complete utterance (best performance)
             with decoder.start_utterance():
                 decoder.process_raw(data, False, True)  # full utterance
@@ -432,6 +457,14 @@ def async_setup(hass, config):
 
     # -------------------------------------------------------------------------
 
+    @asyncio.coroutine
+    def async_reset(call):
+        nonlocal decoder
+        _LOGGER.debug('Reset decoder')
+        decoder = None  # will load dynamically
+
+    # -------------------------------------------------------------------------
+
     hass.http.register_view(ExternalSpeechView)
 
     # Service to record commands
@@ -440,6 +473,9 @@ def async_setup(hass, config):
     # Service to do speech to text
     hass.services.async_register(DOMAIN, SERVICE_DECODE, async_decode,
                                  schema=SCHEMA_SERVICE_DECODE)
+
+    # Service to reload decoder
+    hass.services.async_register(DOMAIN, SERVICE_RESET, async_reset)
 
     hass.states.async_set(OBJECT_POCKETSPHINX, STATE_IDLE, state_attrs)
 

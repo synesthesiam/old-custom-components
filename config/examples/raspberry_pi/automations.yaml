@@ -38,3 +38,11 @@
     - service: conversation.process
       data_template:
         text: "{{ trigger.event.data['text'] }}"
+
+# Force stt_pocketsphinx to reload decoder after training
+- alias: "Reload after training"
+  trigger:
+    platform: event
+    event_type: rhasspy_trained
+  action:
+    - service: stt_pocketsphinx.reset
