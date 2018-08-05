@@ -75,8 +75,8 @@ and intents by editing the examples markdown file(s) pointed to by your
 training format](https://nlu.rasa.com/dataformat.html#markdown-format), and are
 used to (1) generate a
 [dictionary](https://cmusphinx.github.io/wiki/tutorialdict/) and [language
-model](https://cmusphinx.github.io/wiki/tutoriallm/) for pocketsphinx, and (2)
-train an [intent recognizer](https://nlu.rasa.com/) that will trigger [intents
+model](https://cmusphinx.github.io/wiki/tutoriallm) for pocketsphinx, and (2)
+train an [intent recognizer](https://nlu.rasa.com) that will trigger [intents
 inside Home Assistant](https://www.home-assistant.io/components/intent_script).
 
 Home Assistant Components
