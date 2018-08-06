@@ -64,8 +64,6 @@ EVENT_UNKNOWN_INTENT = 'unknown_intent'
 # -----------------------------------------------------------------------------
 
 class RasaIntentRecognizer(object):
-    import rasa_nlu
-
     def __init__(self, name, hass, project_dir):
         self._name = name
         self._hass = hass
@@ -74,6 +72,7 @@ class RasaIntentRecognizer(object):
         self._projects = {}
 
     def parse(self, message, project_name):
+        import rasa_nlu
         from rasa_nlu.project import Project
         self.logger.info('Parsing message with %s: %s' % (project_name, message))
 
