@@ -20,7 +20,7 @@ from homeassistant.components.http import HomeAssistantView
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['pocketsphinx==0.1.15', 'webrtcvad==2.0.10', 'PyAudio>=0.2.8']
+REQUIREMENTS = ['pocketsphinx>=0.1.15', 'webrtcvad>=2.0.10', 'PyAudio>=0.2.8']
 DEPENDENCIES = ['http']
 
 # -----------------------------------------------------------------------------
@@ -32,6 +32,8 @@ DEPENDENCIES = ['http']
 # -----------------------------------------------------------------------------
 
 DOMAIN = 'stt_pocketsphinx'
+DECODER = 'decoder'
+PHRASE = 'phrase'
 STT_API_ENDPOINT = '/api/%s' % DOMAIN
 
 # ------
@@ -189,8 +191,9 @@ def async_setup(hass, config):
     seconds_per_buffer = buffer_size / sample_rate
 
     # Speech-to-text decoder will be loaded on the fly
-    from pocketsphinx import Pocketsphinx, Ad
-    decoder = None
+    from pocketsphinx import Pocketsphinx
+    hass.data[DOMAIN][DECODER] = None
+    hass.data[DOMAIN][PHRASE] = None
 
     import pyaudio
     data_format = pyaudio.get_format_from_width(sample_width)
@@ -211,98 +214,13 @@ def async_setup(hass, config):
 
     @asyncio.coroutine
     def async_listen(call):
-        nonlocal decoded_phrase, terminated
-        decoded_phrase = None
+        nonlocal terminated
         terminated = False
 
         hass.states.async_set(OBJECT_POCKETSPHINX, STATE_LISTENING, state_attrs)
-
-        # Recording state
-        max_buffers = int(math.ceil(timeout_sec / seconds_per_buffer))
-        silence_buffers = int(math.ceil(silence_sec / seconds_per_buffer))
-        min_phrase_buffers = int(math.ceil(min_sec / seconds_per_buffer))
-        in_phrase = False
-        after_phrase = False
-        finished = False
-
-        recorded_data = bytearray()
-
-        # PyAudio callback for each buffer from audio device
-        def stream_callback(buf, frame_count, time_info, status):
-            nonlocal max_buffers, silence_buffers, min_phrase_buffers
-            nonlocal in_phrase, after_phrase
-            nonlocal recorded_data, finished
-
-            # Check maximum number of seconds to record
-            max_buffers -= 1
-            if max_buffers <= 0:
-                # Timeout
-                finished = True
-
-                # Reset
-                in_phrase = False
-                after_phrase = False
-
-            # Detect speech in buffer
-            is_speech = vad.is_speech(buf, sample_rate)
-            if is_speech and not in_phrase:
-                # Start of phrase
-                in_phrase = True
-                after_phrase = False
-                recorded_data += buf
-                min_phrase_buffers = int(math.ceil(min_sec / seconds_per_buffer))
-            elif in_phrase and (min_phrase_buffers > 0):
-                # In phrase, before minimum seconds
-                recorded_data += buf
-                min_phrase_buffers -= 1
-            elif in_phrase and is_speech:
-                # In phrase, after minimum seconds
-                recorded_data += buf
-            elif not is_speech:
-                # Outside of speech
-                if after_phrase and (silence_buffers > 0):
-                    # After phrase, before stop
-                    recorded_data += buf
-                    silence_buffers -= 1
-                elif after_phrase and (silence_buffers <= 0):
-                    # Phrase complete
-                    recorded_data += buf
-                    finished = True
-
-                    # Reset
-                    in_phrase = False
-                    after_phrase = False
-                elif in_phrase and (min_phrase_buffers <= 0):
-                    # Transition to after phrase
-                    after_phrase = True
-                    silence_buffers = int(math.ceil(silence_sec / seconds_per_buffer))
-
-            if finished:
-                recorded_event.set()
-
-            return (buf, pyaudio.paContinue)
-
-        # Open microphone device
-        audio = pyaudio.PyAudio()
-        mic = audio.open(format=data_format,
-                         channels=channels,
-                         rate=sample_rate,
-                         input_device_index=audio_device_index,
-                         input=True,
-                         stream_callback=stream_callback,
-                         frames_per_buffer=buffer_size)
-
-        loop = asyncio.get_event_loop()
-
-        # Wait for recorded to complete
-        recorded_event.clear()
-        mic.start_stream()
-        yield from loop.run_in_executor(None, recorded_event.wait)
-
-        # Stop audio
-        mic.stop_stream()
-        mic.close()
-        audio.terminate()
+        recorded_data = record_speech(seconds_per_buffer,
+                                      timeout_sec, silence_sec, min_sec,
+                                      vad, recorded_event)
 
         if not terminated:
             # Fire recorded event
@@ -314,16 +232,17 @@ def async_setup(hass, config):
             hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
             def decode():
-                nonlocal decoder, decoded_phrase
+                decoder = hass.data[DOMAIN].get(DECODER, None)
 
                 # Dynamically load decoder
                 if decoder is None:
                     _LOGGER.debug('Loading decoder')
                     hass.states.async_set(OBJECT_POCKETSPHINX, STATE_LOADING, state_attrs)
-                    decoder = Pocketsphinx(
-                        hmm=acoustic_model,
-                        lm=language_model,
-                        dic=dictionary)
+                    decoder = Pocketsphinx(hmm=acoustic_model,
+                                           lm=language_model,
+                                           dic=dictionary)
+
+                    hass.data[DOMAIN][DECODER] = decoder
                     hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
                 # Do actual decoding
@@ -332,7 +251,7 @@ def async_setup(hass, config):
                     hyp = decoder.hyp()
                     if hyp:
                         with decoder.end_utterance():
-                            decoded_phrase = hyp.hypstr
+                            hass.data[DOMAIN][PHRASE] = hyp.hypstr
 
                 decoded_event.set()
 
@@ -344,6 +263,7 @@ def async_setup(hass, config):
 
             if not terminated:
                 thread.join()
+                decoded_phrase = hass.data[DOMAIN][PHRASE]
                 state_attrs['text'] = decoded_phrase
                 hass.states.async_set(OBJECT_POCKETSPHINX, STATE_IDLE, state_attrs)
 
@@ -357,8 +277,7 @@ def async_setup(hass, config):
 
     @asyncio.coroutine
     def async_decode(call):
-        nonlocal decoded_phrase, terminated
-        decoded_phrase = None
+        nonlocal terminated
         terminated = False
 
         if ATTR_FILENAME in call.data:
@@ -374,57 +293,23 @@ def async_setup(hass, config):
         hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
         def decode():
-            nonlocal decoder, decoded_phrase, data, filename
+            nonlocal data, filename
 
             # Check if WAV is in the correct format.
             # Convert with sox if not.
             with io.BytesIO(data) as wav_data:
-                with wave.open(wav_data, mode='rb') as wav_file:
-                    rate, width, channels = wav_file.getframerate(), wav_file.getsampwidth(), wav_file.getnchannels()
-                    _LOGGER.debug('rate=%s, width=%s, channels=%s.' % (rate, width, channels))
-
-                    if (rate != 16000) or (width != 2) or (channels != 1):
-                        # Convert to 16-bit 16Khz mono (required by pocketsphinx acoustic models)
-                        _LOGGER.debug('Need to convert to 16-bit 16Khz mono.')
-                        if shutil.which('sox') is None:
-                            _LOGGER.error("'sox' command not found. Cannot convert WAV file to appropriate format. Expect poor performance.")
-                        else:
-                            temp_input_file = None
-                            if filename is None:
-                                # Need to write original WAV data out to a file for sox
-                                temp_input_file = tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+')
-                                temp_input_file.write(data)
-                                temp_input_file.seek(0)
-                                filename = temp_input_file.name
-
-                            # sox <IN> -r 16000 -e signed-integer -b 16 -c 1 <OUT>
-                            with tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+') as out_wav_file:
-                                subprocess.check_call(['sox',
-                                                       filename,
-                                                       '-r', '16000',
-                                                       '-e', 'signed-integer',
-                                                       '-b', '16',
-                                                       '-c', '1',
-                                                       out_wav_file.name])
-
-                                out_wav_file.seek(0)
-
-                                # Use converted data
-                                with wave.open(out_wav_file, 'rb') as wav_file:
-                                    data = wav_file.readframes(wav_file.getnframes())
-
-                            if temp_input_file is not None:
-                                # Clean up temporary file
-                                del temp_input_file
+                data = convert_wav(wav_data)
 
             # Dynamically load decoder
+            decoder = hass.data[DOMAIN][DECODER]
             if decoder is None:
                 _LOGGER.debug('Loading decoder')
                 hass.states.async_set(OBJECT_POCKETSPHINX, STATE_LOADING, state_attrs)
-                decoder = Pocketsphinx(
-                    hmm=acoustic_model,
-                    lm=language_model,
-                    dic=dictionary)
+                decoder = Pocketsphinx(hmm=acoustic_model,
+                                       lm=language_model,
+                                       dic=dictionary)
+
+                hass.data[DOMAIN][DECODER] = decoder
                 hass.states.async_set(OBJECT_POCKETSPHINX, STATE_DECODING, state_attrs)
 
             # Process WAV data as a complete utterance (best performance)
@@ -432,7 +317,7 @@ def async_setup(hass, config):
                 decoder.process_raw(data, False, True)  # full utterance
                 if decoder.hyp():
                     with decoder.end_utterance():
-                        decoded_phrase = decoder.hyp().hypstr
+                        hass.data[DOMAIN][PHRASE] = decoder.hyp().hypstr
 
             decoded_event.set()
 
@@ -446,6 +331,7 @@ def async_setup(hass, config):
 
         if not terminated:
             thread.join()
+            decoded_phrase = hass.data[DOMAIN][PHRASE]
             state_attrs['text'] = decoded_phrase
             hass.states.async_set(OBJECT_POCKETSPHINX, STATE_IDLE, state_attrs)
 
@@ -459,9 +345,8 @@ def async_setup(hass, config):
 
     @asyncio.coroutine
     def async_reset(call):
-        nonlocal decoder
         _LOGGER.debug('Reset decoder')
-        decoder = None  # will load dynamically
+        hass.data[DOMAIN][DECODER] = None  # will load dynamically
 
     # -------------------------------------------------------------------------
 
@@ -495,6 +380,145 @@ def async_setup(hass, config):
 
 # -----------------------------------------------------------------------------
 
+def convert_wav(wav_data, filename=None):
+    data = wav_data
+    with wave.open(wav_data, mode='rb') as wav_file:
+        rate, width, channels = wav_file.getframerate(), wav_file.getsampwidth(), wav_file.getnchannels()
+        _LOGGER.debug('rate=%s, width=%s, channels=%s.' % (rate, width, channels))
+
+        if (rate != 16000) or (width != 2) or (channels != 1):
+            # Convert to 16-bit 16Khz mono (required by pocketsphinx acoustic models)
+            _LOGGER.debug('Need to convert to 16-bit 16Khz mono.')
+            if shutil.which('sox') is None:
+                _LOGGER.error("'sox' command not found. Cannot convert WAV file to appropriate format. Expect poor performance.")
+            else:
+                temp_input_file = None
+                if filename is None:
+                    # Need to write original WAV data out to a file for sox
+                    temp_input_file = tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+')
+                    temp_input_file.write(data)
+                    temp_input_file.seek(0)
+                    filename = temp_input_file.name
+
+                # sox <IN> -r 16000 -e signed-integer -b 16 -c 1 <OUT>
+                with tempfile.NamedTemporaryFile(suffix='.wav', mode='wb+') as out_wav_file:
+                    subprocess.check_call(['sox',
+                                            filename,
+                                            '-r', '16000',
+                                            '-e', 'signed-integer',
+                                            '-b', '16',
+                                            '-c', '1',
+                                            out_wav_file.name])
+
+                    out_wav_file.seek(0)
+
+                    # Use converted data
+                    with wave.open(out_wav_file, 'rb') as wav_file:
+                        data = wav_file.readframes(wav_file.getnframes())
+
+                if temp_input_file is not None:
+                    # Clean up temporary file
+                    del temp_input_file
+
+    return data, filename
+
+def record_speech(seconds_per_buffer,
+                  timeout_sec, silence_sec, min_sec,
+                  vad, recorded_event):
+
+    # Recording state
+    max_buffers = int(math.ceil(timeout_sec / seconds_per_buffer))
+    silence_buffers = int(math.ceil(silence_sec / seconds_per_buffer))
+    min_phrase_buffers = int(math.ceil(min_sec / seconds_per_buffer))
+    in_phrase = False
+    after_phrase = False
+    finished = False
+
+    recorded_data = bytearray()
+
+    # PyAudio callback for each buffer from audio device
+    def stream_callback(buf, frame_count, time_info, status):
+        nonlocal max_buffers, silence_buffers, min_phrase_buffers
+        nonlocal in_phrase, after_phrase
+        nonlocal recorded_data, finished
+
+        # Check maximum number of seconds to record
+        max_buffers -= 1
+        if max_buffers <= 0:
+            # Timeout
+            finished = True
+
+            # Reset
+            in_phrase = False
+            after_phrase = False
+
+        # Detect speech in buffer
+        is_speech = vad.is_speech(buf, sample_rate)
+        if is_speech and not in_phrase:
+            # Start of phrase
+            in_phrase = True
+            after_phrase = False
+            recorded_data += buf
+            min_phrase_buffers = int(math.ceil(min_sec / seconds_per_buffer))
+        elif in_phrase and (min_phrase_buffers > 0):
+            # In phrase, before minimum seconds
+            recorded_data += buf
+            min_phrase_buffers -= 1
+        elif in_phrase and is_speech:
+            # In phrase, after minimum seconds
+            recorded_data += buf
+        elif not is_speech:
+            # Outside of speech
+            if after_phrase and (silence_buffers > 0):
+                # After phrase, before stop
+                recorded_data += buf
+                silence_buffers -= 1
+            elif after_phrase and (silence_buffers <= 0):
+                # Phrase complete
+                recorded_data += buf
+                finished = True
+
+                # Reset
+                in_phrase = False
+                after_phrase = False
+            elif in_phrase and (min_phrase_buffers <= 0):
+                # Transition to after phrase
+                after_phrase = True
+                silence_buffers = int(math.ceil(silence_sec / seconds_per_buffer))
+
+        if finished:
+            recorded_event.set()
+
+        return (buf, pyaudio.paContinue)
+
+    # Open microphone device
+    audio = pyaudio.PyAudio()
+    mic = audio.open(format=data_format,
+                      channels=channels,
+                      rate=sample_rate,
+                      input_device_index=audio_device_index,
+                      input=True,
+                      stream_callback=stream_callback,
+                      frames_per_buffer=buffer_size)
+
+    loop = asyncio.get_event_loop()
+
+    # Wait for recorded to complete
+    recorded_event.clear()
+    mic.start_stream()
+    yield from loop.run_in_executor(None, recorded_event.wait)
+
+    # Stop audio
+    mic.stop_stream()
+    mic.close()
+    audio.terminate()
+
+    return recorded_data
+
+def decode_speech():
+    pass
+
+# -----------------------------------------------------------------------------
 
 class ExternalSpeechView(HomeAssistantView):
     """Handle speech to text requests via HTTP."""
