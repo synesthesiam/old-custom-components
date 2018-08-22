@@ -1,7 +1,0 @@
-__pycache__/
-/.venv/
-/deps/
-/config/deps/
-/config/.HA_VERSION
-/data/
-/config/home-assistant.log
