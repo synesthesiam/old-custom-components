@@ -48,7 +48,6 @@ The following dependencies should be installed from the Raspbian repositories:
 * SRILM
     * `libtcl8.6`
 * snowboy
-    * `libatlas-dev`
     * `libatlas-base-dev`
     
 You can install them all at once with a single command:
@@ -59,7 +58,7 @@ You can install them all at once with a single command:
         portaudio19-dev \
         libttspico-utils \
         libtcl8.6 \
-        libatlas-dev libatlas-base-dev
+        libatlas-base-dev
         
 2. Home Assistant
 ---------------------
@@ -73,22 +72,30 @@ environment](https://www.home-assistant.io/docs/installation/virtualenv/).
 
 1. Create a virtual environment with access to system site packages:
 
-    python3 -m venv homeassistant
+```
+python3 -m venv homeassistant
+```
     
 2. Open the virtual environment and activate it:
 
-    cd homeassistant
-    source bin/activate
+```
+cd homeassistant
+source bin/activate
+```
     
 3. Install Home Assistant:
 
-    python3 -m pip install wheel
-    python3 -m pip install homeassistant
+```
+python3 -m pip install wheel
+python3 -m pip install homeassistant
+```
     
 4. Run Home Assistant (wait for it to install dependencies):
 
-    mkdir -p config
-    hass -c config
+```
+mkdir -p config
+hass -c config
+```
     
 5. Open a web browser and visit [http://localhost:8123](http://localhost:8123)
 
@@ -131,15 +138,19 @@ full path to them during configuration.
 
 5. Install snowboy
 
-    cd homeassistant
-    source bin/activate
-    python3 -m pip install https://github.com/Kitt-AI/snowboy/archive/v1.3.0.tar.gz
+```
+cd homeassistant
+source bin/activate
+python3 -m pip install https://github.com/Kitt-AI/snowboy/archive/v1.3.0.tar.gz
+```
      
 6. Run Home Assistant (wait **a long time** for it to install dependencies):
  
-    cd homeassistant
-    source bin/activate
-    hass -c config
+```
+ cd homeassistant
+ source bin/activate
+ hass -c config
+```
      
 You can now test rhasspy with phrases like:
 
