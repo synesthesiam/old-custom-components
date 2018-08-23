@@ -14,7 +14,8 @@ from homeassistant.helpers import intent, config_validation as cv
 _LOGGER = logging.getLogger(__name__)
 
 REQUIREMENTS = ['spacy==2.0.11', 'sklearn-crfsuite==0.3.6',
-                'scikit-learn==0.19.1', 'rasa-nlu==0.12.3']
+                'scikit-learn==0.19.1', 'rasa-nlu==0.12.3',
+                'scipy==1.1.0']
 
 DOMAIN = 'rasa_nlu'
 DEFAULT_NAME = 'rasa_nlu'
