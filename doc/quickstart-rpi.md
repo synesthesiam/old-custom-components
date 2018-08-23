@@ -60,8 +60,8 @@ You can install them all at once with a single command:
         libtcl8.6 \
         libatlas-base-dev
         
-2. Home Assistant
----------------------
+Home Assistant
+------------------
 
 If you don't have Home Assistant installed, you can follow one of their
 [installation guides](https://www.home-assistant.io/docs/installation/) or the
@@ -105,8 +105,8 @@ should find a `config` directory inside your `homeassistant` directory with
 
 Make sure to stop Home Assistant by pressing CTRL+C in its terminal window.
 
-3. Rhasspy Assistant
-------------------------
+Rhasspy Assistant
+----------------------
 
 Next, we'll download and configure rhasspy. This involves downloading the
 software that rhasspy depends on (`rhasspy-tools`) as well as the Home Assistant
@@ -159,8 +159,8 @@ You can now test rhasspy with phrases like:
 * "okay rhasspy" (wait for beep) "is the garage door open?"
 * "okay rhasspy" (wait for beep) "what's the temperature like?"
 
-4. Extending Rhasspy
-------------------------
+Extending Rhasspy
+----------------------
 
 If you want to add new phrases/intents, you need to:
 
