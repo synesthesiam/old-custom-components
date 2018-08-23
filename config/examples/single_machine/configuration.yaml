@@ -39,9 +39,9 @@ picotts_aplay:
 # Play WAV files using aplay.
 wav_aplay:
 
-# Listen for a hotword with mycroft precise.
-hotword_precise:
-  model: $RHASSPY_ASSISTANT/wake/mycroft-precise/okay-rhasspy.pb
+# Listen for a hotword with snowboy.
+hotword_snowboy:
+  model: $RHASSPY_ASSISTANT/wake/snowboy/okay_rhasspy.pmdl
 
 # Service for training rhasspy speech/intent recognizers
 rhasspy_train:

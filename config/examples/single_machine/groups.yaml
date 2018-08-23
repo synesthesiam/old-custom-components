@@ -20,8 +20,9 @@ inside:
 rhasspy:
   name: "rhasspy"
   entities:
-    - hotword_precise.decoder
+    - hotword_snowboy.decoder
     - stt_pocketsphinx.pocketsphinx
     - sensor.last_text
     - rasa_nlu.recognizer
     - sensor.last_intent
+    - rhasspy_train.trainer

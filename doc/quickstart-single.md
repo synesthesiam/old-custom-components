@@ -6,8 +6,8 @@ desktop machine (x86_64).
 
 The following Home Assistant components from rhasspy will be used:
 
-* `hotword_precise`
-    * Can be trained offline with custom hotwords
+* `hotword_snowboy`
+    * Low resource usage and low false positive rate
 * `stt_pocketsphinx`
     * Recommend using the non-PTM acoustic model (`cmusphinx-en-us-5.2`) for more accurate decoding
 * `rasa_nlu`
@@ -121,6 +121,14 @@ placeholders in `configuration.yaml` and `automations.yaml`:
 * `$RHASSPY_ASSISTANT` - replace with the full path to the `rhasspy-assistant` directory
 * `$RHASSPY_TOOLS` - replace with the full path to the `rhasspy-tools` directory
      
+Install snowboy:
+
+```
+cd homeassistant
+source bin/activate
+python3 -m pip install https://github.com/Kitt-AI/snowboy/archive/v1.3.0.tar.gz
+```
+
 Run Home Assistant (wait for it to install dependencies):
  
     cd homeassistant

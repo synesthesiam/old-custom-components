@@ -4,7 +4,7 @@
     platform: homeassistant
     event: start
   action:
-    service: hotword_precise.listen
+    service: hotword_snowboy.listen
 
 # Play a sound when the hotword is detected.
 # Start listening for a command.
@@ -38,7 +38,7 @@
       data_template:
         message: "{{ trigger.event.data['text'] }}"
         project: rhasspy
-    - service: hotword_precise.listen
+    - service: hotword_snowboy.listen
 
 # Play a sound if the intent was recognized
 - alias: "known intent"
