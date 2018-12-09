@@ -1,5 +1,7 @@
-rhasspy Voice Assistant Toolkit
+Rhasspy Voice Assistant Toolkit
 ======================================
+
+**NOTE:**: Development on Rhasspy has continued as a [Hass.IO add-on](https://github.com/synesthesiam/rhasspy-hassio-addon).
 
 rhasspy is a toolkit for developing custom voice assistants, hosted in the [Home
  Assistant](https://www.home-assistant.io/) platform. It can run on a [Raspberry
