@@ -33,7 +33,7 @@ rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
       takes a (possibly large) set of [annotated training
       phrases](https://nlu.rasa.com/dataformat.html), and uses them to both
       generate a [language model](https://cmusphinx.github.io/wiki/tutoriallm/)
-      and train an (intent recognizer)[https://nlu.rasa.com/]. In order to
+      and train an [intent recognizer](https://nlu.rasa.com/). In order to
       accomodate flexible speech input, the generated language model is "mixed"
       with [CMU's base English
       model](https://sourceforge.net/projects/cmusphinx/files/Acoustic%20and%20Language%20Models/US%20English/).
