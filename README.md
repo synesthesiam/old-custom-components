@@ -1,35 +1,37 @@
 Rhasspy Voice Assistant Toolkit
 ======================================
 
-**NOTE:**: Development on Rhasspy has continued as a [Hass.IO add-on](https://github.com/synesthesiam/rhasspy-hassio-addon).
+**NOTE**: Development on Rhasspy has continued as a [Hass.IO add-on](https://github.com/synesthesiam/rhasspy-hassio-addon).
 
-rhasspy is a toolkit for developing custom voice assistants, hosted in the [Home
+---
+
+Rhasspy is a toolkit for developing custom voice assistants, hosted in the [Home
  Assistant](https://www.home-assistant.io/) platform. It can run on a [Raspberry
  Pi](https://www.raspberrypi.org/) or other modest hardware.
 
 This project was inspired by [Jasper](https://jasperproject.github.io/), a voice
-assistant developed by students at Princeton. Like Jasper, rhasspy is open
+assistant developed by students at Princeton. Like Jasper, Rhasspy is open
 source, built entirely from free software, and is intended to run on modest
 off-the-shelf hardware. However, there are some important differences that set
-rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
+Rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
 
 * **Offline by Default**
-    * rhasspy is designed to run *without an internet connection*, and without
+    * Rhasspy is designed to run *without an internet connection*, and without
       requiring the user to sign up for any 3rd party services. The option is
       there, however, if better accuracy is needed (such as using the
       [snowboy](https://snowboy.kitt.ai/) hotword detector).
 * **Hosted in Home Assistant**
-    * rhasspy is not a standalone piece of software, but exists as a set of
+    * Rhasspy is not a standalone piece of software, but exists as a set of
       resuable *Home Assistant components* that connect directly to Home
       Assistant's [intent
       system](https://developers.home-assistant.io/docs/en/intent_index.html).
-      This gives rhasspy access to hundreds of
+      This gives Rhasspy access to hundreds of
       [components](https://www.home-assistant.io/components/) out of the box,
-      and lets users incorporate only the pieces of rhasspy they're interested
+      and lets users incorporate only the pieces of Rhasspy they're interested
       in.
 * **Modern Tools and Techniques**
     * Jasper used [pocketsphinx](https://github.com/cmusphinx/pocketsphinx) for
-      keyword matching on a small set of user-defined keywords. rhasspy instead
+      keyword matching on a small set of user-defined keywords. Rhasspy instead
       takes a (possibly large) set of [annotated training
       phrases](https://nlu.rasa.com/dataformat.html), and uses them to both
       generate a [language model](https://cmusphinx.github.io/wiki/tutoriallm/)
@@ -46,7 +48,7 @@ rhasspy apart from Jasper and other voice assistants (Alexa, Google Home, etc.):
 Overview
 ----------
 
-rhasspy provides a set of custom components for Home Assistant, which depend on
+Rhasspy provides a set of custom components for Home Assistant, which depend on
 the tools found in
 [rhasspy-tools](https://github.com/synesthesiam/rhasspy-tools). There are
 [several
@@ -71,7 +73,7 @@ In general, the installation process involves:
 7. Downloading a `spaCy` language model and linking it
     * For example: `python3 -m spacy download en`
 
-Once you have rhasspy installed and working, you can add new training phrases
+Once you have Rhasspy installed and working, you can add new training phrases
 and intents by editing the examples markdown file(s) pointed to by your
 `rhasspy_train` component configuration. These files are in [rasaNLU's markdown
 training format](https://nlu.rasa.com/dataformat.html#markdown-format), and are
@@ -84,7 +86,7 @@ inside Home Assistant](https://www.home-assistant.io/components/intent_script).
 Home Assistant Components
 ------------------------------
 
-rhasspy provides the following custom components for Home Assistant. They can be
+Rhasspy provides the following custom components for Home Assistant. They can be
 mixed and matched to fit a number of scenarios, including running everything on
 a single machine, a Raspberry Pi, or a client and server.
 
@@ -148,10 +150,10 @@ Hardware Requirements
     * Raspberry Pi 3 is slow, but works
     * Any desktop computer or server that can run Linux (`armv7l` or `x86_64`)
 
-Running rhasspy
+Running Rhasspy
 ------------------
 
-rhasspy is just a collection of Home Assistant components, so it runs when
+Rhasspy is just a collection of Home Assistant components, so it runs when
 you've copied the custom components to your configuration directory (sometimes
 `~/.homeassistant`) and added the appropriate entries to your
 `configuration.yaml` file.
@@ -186,12 +188,12 @@ with the path to where you cloned
 [rhasspy-tools](https://github.com/synesthesiam/rhasspy-tools).
 
 Importantly, the example `automations.yaml` file defines rules for Home
-Assistant that pass information between rhasspy's components. These are critical
-for ensuring that rhasspy listens for the wake word on startup, listens for
+Assistant that pass information between Rhasspy's components. These are critical
+for ensuring that Rhasspy listens for the wake word on startup, listens for
 commands when woken up, and passes commands to the intent recognizer.
 
-An interaction between a user and rhasspy is pictured below. Each step of the
-process is shown, from waking up to response. Because the output of rhasspy's
+An interaction between a user and Rhasspy is pictured below. Each step of the
+process is shown, from waking up to response. Because the output of Rhasspy's
 speech/intent recognition is a Home Assistant intent (possibly with slots
 filled), you can script *any* set of actions to follow using the built-in
 [intent_script](https://www.home-assistant.io/components/intent_script/)
@@ -205,7 +207,7 @@ variables in your template.
 Training
 ----------
 
-Once you have rhasspy configured and running, you can extend it by adding new
+Once you have Rhasspy configured and running, you can extend it by adding new
 training phrases. By default, these are stored in Markdown format in
 `rhasspy-assistant/data/examples.md`. Examples are broken down by intent, so
 
@@ -227,7 +229,7 @@ configuration and making sure the name matches (e.g., `GetTemperature` under
   <img src="etc/images/training_data.png" alt="training data format" width="600px" />
 </p>
 
-Whenever you modify your examples, you need to re-train rhasspy by calling the
+Whenever you modify your examples, you need to re-train Rhasspy by calling the
 `rhasspy_train.train` service (either from the Home Assistant frontend or via a
 REST call). Watch the logs carefully for errors, and check
 `rhasspy-assistant/data` to make sure new `mixed.dict` and `mixed.lm` files are
