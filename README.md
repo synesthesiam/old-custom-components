@@ -269,7 +269,7 @@ Be careful to only install the voices you need. MaryTTS seems to load them all
 into RAM up front, so a Raspberry Pi will run out of room quickly. If you want
 to install all of the English voices, do the following:
 
-    for voice in dkfi-prudence dfki-poppy dfki-obadiah dfki-spike cmu-bdl cmu-rms; do
+    for voice in dfki-prudence dfki-poppy dfki-obadiah dfki-spike cmu-bdl cmu-rms; do
       wget -O marytts-5.2/download/voice-$voice-hsmm-5.2.zip https://github.com/marytts/voice-$voice-hsmm/releases/download/v5.2/voice-$voice-hsmm-5.2.zip;
       unzip -d marytts-5.2 marytts-5.2/download/voice-$voice-hsmm-5.2.zip;
     done
