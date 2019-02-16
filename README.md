@@ -1,7 +1,7 @@
-Rhasspy Voice Assistant Toolkit
-======================================
+# THIS REPOSITORY HAS BEEN DEPRECATED
 
-**NOTE**: Development on Rhasspy has continued as a [Hass.IO add-on](https://github.com/synesthesiam/rhasspy-hassio-addon).
+
+Please go to: https://github.com/synesthesiam/rhasspy
 
 ---
 
